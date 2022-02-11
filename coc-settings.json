@@ -1,0 +1,38 @@
+{
+  "coc.preferences.formatOnSaveFiletypes": [
+    "typescript",
+    "typescriptreact",
+    "javascriptreact",
+    "javascript",
+    "json",
+    "css",
+    "scss",
+    "markdown"
+  ],
+  "cSpell.userWords": [
+    "API's",
+    "DATETIME",
+    "DOCUMENTID",
+    "Dtos",
+    "LDAP",
+    "Metatdata",
+    "PLAYERID",
+    "PSPDF",
+    "Peloton",
+    "Serializable",
+    "Sros",
+    "Titlebar",
+    "accum",
+    "bmark",
+    "datepicker",
+    "draftjs",
+    "pdfs",
+    "pspdfkit",
+    "reduxjs",
+    "rerender",
+    "unmock",
+    "unmount",
+    "usermatters",
+    "uuidv"
+  ]
+}
