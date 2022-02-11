@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  dotnet:
+    build:
+      context: .
+      target: "dotnet"
+    profiles: ["dotnet"]
+    volumes:
+      - type: bind
+        source: ~/dev
+        target: /code
