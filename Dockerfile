@@ -9,3 +9,4 @@ USER sam
 WORKDIR /home/sam
 COPY dotfiles/vimrc-omni .vimrc
 COPY dotfiles/tmux.conf .tmux.conf
+COPY vim .vim
