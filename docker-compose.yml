@@ -8,4 +8,4 @@ services:
     volumes:
       - type: bind
         source: ~/dev
-        target: /code
+        target: /home/sam/code
