@@ -9,6 +9,6 @@ COPY dotfiles/vimrc-omni-install .vimrc
 COPY dotfiles/tmux.conf .tmux.conf
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
-COPY omnisharp-manager.sh .vim/plugged/omnisharp-vim/installer/
 ENV TERM="xterm-256color"
+RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
 ENTRYPOINT bash
