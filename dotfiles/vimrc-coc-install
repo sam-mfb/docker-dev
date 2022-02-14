@@ -7,7 +7,7 @@ endif
 call plug#begin('~/.vim/plugged')
   Plug 'junegunn/fzf'
   Plug 'junegunn/fzf.vim'
-  Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
+  Plug 'kkoomen/vim-doge', 
   Plug 'neoclide/jsonc.vim'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'gruvbox-community/gruvbox'
@@ -19,5 +19,5 @@ call plug#begin('~/.vim/plugged')
   Plug 'maxmellon/vim-jsx-pretty' 
 call plug#end()
 
-let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml', 'coc-omnisharp' ]
+let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml']
 
