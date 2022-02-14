@@ -9,6 +9,9 @@ services:
       - type: bind
         source: ~/dev
         target: /home/sam/code
+      - type: bind
+        source : ~/.ssh
+        target: /home/sam/.ssh
     working_dir: /home/sam/code
   ts:
     build:
@@ -19,4 +22,7 @@ services:
       - type: bind
         source: ~/dev
         target: /home/sam/code
+      - type: bind
+        source : ~/.ssh
+        target: /home/sam/.ssh
     working_dir: /home/sam/code
