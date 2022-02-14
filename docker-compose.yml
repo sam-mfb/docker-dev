@@ -9,6 +9,7 @@ services:
       - type: bind
         source: ~/dev
         target: /home/sam/code
+    working_dir: /home/sam/code
   ts:
     build:
       context: .
@@ -18,3 +19,4 @@ services:
       - type: bind
         source: ~/dev
         target: /home/sam/code
+    working_dir: /home/sam/code

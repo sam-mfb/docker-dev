@@ -1,10 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim AS base
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh
 RUN useradd -ms /bin/bash sam
 WORKDIR /home/sam
 ENV TERM="xterm-256color"
 COPY dotfiles/tmux.conf .tmux.conf
+ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash .git-completion.bash
+ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh .git-prompt.sh
+COPY dotfiles/bashrc .bashrc
+RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
 RUN chown -R sam /home/sam
 USER sam
 ENTRYPOINT bash
