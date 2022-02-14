@@ -9,3 +9,12 @@ services:
       - type: bind
         source: ~/dev
         target: /home/sam/code
+  ts:
+    build:
+      context: .
+      target: "ts"
+    profiles: ["ts"]
+    volumes:
+      - type: bind
+        source: ~/dev
+        target: /home/sam/code
