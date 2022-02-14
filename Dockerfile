@@ -16,7 +16,15 @@ COPY dotfiles/vimrc-omni .vimrc
 RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
 
 FROM base AS ts
+SHELL ["/bin/bash", "--login", "-c"]
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+&& . ~/.nvm/nvm.sh \
+&& nvm install lts/gallium \
+&& nvm install lts/fermium
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
+RUN mkdir -pv /home/sam/.config/coc
+RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml' +qa
+RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY vim/coc-settings.json .vim/coc-settings.json
