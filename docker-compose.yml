@@ -13,17 +13,3 @@ services:
         source : ~/.ssh
         target: /home/sam/.ssh
     working_dir: /home/sam/code
-  ts:
-    build:
-      context: .
-      target: "ts"
-    profiles: ["ts"]
-    volumes:
-      - type: bind
-        source: ~/dev
-        target: /home/sam/code
-      - type: bind
-        source : ~/.ssh
-        target: /home/sam/.ssh
-    working_dir: /home/sam/code
-    ports: ["3000:3000"]

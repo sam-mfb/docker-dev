@@ -1,0 +1,5 @@
+[user]
+	email = sam@mfbtech.com
+	name = Sam Davidoff
+[pull]
+	rebase = false
