@@ -32,3 +32,4 @@ RUN mkdir -pv /home/sam/.config/coc
 RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml' +qa
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY vim/coc-settings.json .vim/coc-settings.json
+RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
