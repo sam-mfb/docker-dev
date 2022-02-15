@@ -20,7 +20,7 @@ RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
 RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
 
-FROM base AS ts
+FROM base AS align-ts-dev
 SHELL ["/bin/bash", "--login", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
 && . ~/.nvm/nvm.sh \
@@ -38,3 +38,4 @@ RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 RUN --mount=type=ssh,uid=1002 git clone git@ssh.dev.azure.com:v3/MFBTech/Syzygy%20Web%20App/align-ts
 WORKDIR /home/sam/align-ts
 RUN rush install
+RUN git reset --hard
