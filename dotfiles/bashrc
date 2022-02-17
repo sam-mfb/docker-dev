@@ -1,13 +1,20 @@
-# commands relative to root of current git repository
+## commands relative to root of current git repository
+
+# navigate to root of repository
 alias cdg='cd "$(git rev-parse --show-cdup)"'
+
+# list files at root of repository
 alias lsg='ls "$(git rev-parse --show-cdup)"'
 
-# enable vi mode
+# enable vi mode in the terminal
+# if you are not a vim user you may want to comment this out
 set -o vi
 
-# git completion
+# git tab completion
 source ~/.git-completion.bash
 
+## uncomment if you want to get git status in the prompt
+## NB: it is slow
 # git prompt
 # source ~/.git-prompt.sh
 # export GIT_PS1_SHOWDIRTYSTATE="true"

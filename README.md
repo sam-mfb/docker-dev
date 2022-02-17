@@ -5,6 +5,7 @@
 - Run ssh-add on host to add ssh id to ssh-agent for forwarding
 - Assumes your .ssh directory is at the root of your home directory on your machine
 - Copy your .gitconfig file into the root of this repo (will be ignored by .gitignore)
+- Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
 - Use the existing `run-ts.sh` or `run-dotnet` scripts or create your own `run-[x].sh` script based on them
 
 ## run-[x].sh scripts
