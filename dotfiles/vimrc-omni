@@ -4,6 +4,7 @@
 call plug#begin('~/.vim/plugged')
 
 Plug 'OmniSharp/omnisharp-vim'
+Plug 'pprovost/vim-ps1'
 
 " Mappings, code-actions available flag and statusline integration
 Plug 'nickspoons/vim-sharpenup'
