@@ -1,10 +1,12 @@
 # docker-dev
 
+Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE. Currently has images for TypeScript (using coc-nvim) and C#/.NET Core (using omnisharp-vim)
+
 ## Setup
 
-- Run ssh-add on host to add ssh id to ssh-agent for forwarding
-- Assumes your .ssh directory is at the root of your home directory on your machine
-- Copy your .gitconfig file into the root of this repo (will be ignored by .gitignore)
+- Run `ssh-add` on host to add ssh id to ssh-agent for forwarding
+- Assumes your `.ssh` directory is at the root of your home directory on your machine
+- Copy your `.gitconfig` file into the root of this repo (will not be committed to version control)
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
 - Use the existing `run-ts.sh` or `run-dotnet` scripts or create your own `run-[x].sh` script based on them
 
