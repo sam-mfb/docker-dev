@@ -14,7 +14,7 @@ RUN chown -R sam /home/sam
 USER sam
 ENTRYPOINT bash
 
-FROM base AS dotnet
+FROM base AS align-services-dev
 COPY dotfiles/vimrc-omni-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
