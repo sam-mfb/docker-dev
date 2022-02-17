@@ -12,6 +12,8 @@ COPY dotfiles/gitconfig .gitconfig
 RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
 RUN chown -R sam /home/sam
 USER sam
+RUN mkdir -p -m 0700 ~/.ssh
+RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 ENTRYPOINT bash
 
 FROM base AS align-services-dev
@@ -19,6 +21,9 @@ COPY dotfiles/vimrc-omni-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
 RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
+RUN --mount=type=ssh,uid=1002 git clone git@ssh.dev.azure.com:v3/MFBTech/Syzygy%20API/align-services
+WORKDIR /home/sam/align-services
+RUN dotnet restore
 
 FROM base AS align-ts-dev
 SHELL ["/bin/bash", "--login", "-c"]
@@ -33,8 +38,6 @@ RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-js
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY vim/coc-settings.json .vim/coc-settings.json
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
-RUN mkdir -p -m 0700 ~/.ssh
-RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 RUN --mount=type=ssh,uid=1002 git clone git@ssh.dev.azure.com:v3/MFBTech/Syzygy%20Web%20App/align-ts
 WORKDIR /home/sam/align-ts
 RUN rush install

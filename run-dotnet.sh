@@ -3,8 +3,8 @@
 IMAGE_TARGET="align-services-dev"
 IMAGE_TAG="align-services-dev"
 CONTAINER_NAME="align-services-dev-active"
-HOST_PORTS="12000-13000"
-CONTAINER_PORTS="12000-13000"
+HOST_PORTS="12000-12050"
+CONTAINER_PORTS="12000-12050"
 
 # flags to easily delete image and container
 while getopts ":krx" option; do
