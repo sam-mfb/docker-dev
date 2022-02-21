@@ -1,7 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim AS base
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3
-RUN useradd -ms /bin/bash -u 1002 devuser
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo
+RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 WORKDIR /home/devuser
 ENV TERM="xterm-256color"
 COPY dotfiles/tmux.conf .tmux.conf
