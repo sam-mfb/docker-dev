@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim AS base
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo 
+# cypress dependencies
+RUN apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 WORKDIR /home/devuser
