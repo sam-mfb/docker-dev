@@ -22,6 +22,20 @@ RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 ENTRYPOINT bash
 
+## Cypress build image
+
+FROM node:16-bullseye-slim AS cypress-build
+RUN apt-get update
+RUN apt-get install -y git vim jq zip unzip gcc
+RUN apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+RUN apt-get install -y libgtk-3-dev 
+RUN git clone https://github.com/cypress-io/cypress.git
+WORKDIR cypress
+RUN git checkout tags/v9.3.1 -b build-branch
+RUN yarn install
+RUN yarn binary-build --version "$(jq -r .version < package.json)" 2>&1 > ./build.docker.log && yarn binary-zip
+RUN cp -a /tmp/cypress-build/linux/build/Cypress /Cypress
+
 # .NET Core Development Image
 
 FROM base AS dotnet-dev
@@ -63,3 +77,5 @@ WORKDIR /home/devuser/${CLONE_DIR}
 RUN rush install
 # needed to work around a quirk in our repo where rush install generates a non-ignored script file
 RUN git reset --hard
+RUN rm -rf /home/devuser/.cache/Cypress/9.3.1/Cypress
+COPY --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
