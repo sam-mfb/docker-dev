@@ -59,7 +59,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 # more flexible
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
 && . ~/.nvm/nvm.sh \
-&& nvm install v16.13.1
+&& nvm install lts/gallium
+COPY --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
@@ -67,6 +68,7 @@ RUN mkdir -pv /home/devuser/.config/coc
 RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml' +qa
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
+COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 # assumes we are running a rush repo; uncomment this line and the rush install line if not
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
 ARG GIT_REPO
@@ -77,5 +79,3 @@ WORKDIR /home/devuser/${CLONE_DIR}
 RUN rush install
 # needed to work around a quirk in our repo where rush install generates a non-ignored script file
 RUN git reset --hard
-RUN rm -rf /home/devuser/.cache/Cypress/9.3.1/Cypress
-COPY --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
