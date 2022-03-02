@@ -66,7 +66,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
 && . ~/.nvm/nvm.sh \
 && nvm install lts/gallium
-COPY --chown=devuser --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
+# uncomment to use cyrpress from source
+#COPY --chown=devuser --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
