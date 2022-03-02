@@ -91,3 +91,4 @@ WORKDIR /home/devuser/${CLONE_DIR}
 RUN rush install
 # needed to work around a quirk in our repo where rush install generates a non-ignored script file
 RUN git reset --hard
+VOLUME /home/devuser/$CLONE_DIR
