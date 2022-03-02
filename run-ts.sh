@@ -1,6 +1,6 @@
 #/bin/bash
 
-IMAGE_TARGET="ts-dev"
+IMAGE_TARGET="ts-dev-align"
 IMAGE_TAG="align-ts-dev"
 CONTAINER_NAME="align-ts-dev-active"
 DOCKER_USER_HOME="/home/devuser"

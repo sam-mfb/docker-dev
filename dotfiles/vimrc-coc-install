@@ -7,7 +7,8 @@ endif
 call plug#begin('~/.vim/plugged')
   Plug 'junegunn/fzf'
   Plug 'junegunn/fzf.vim'
-  Plug 'kkoomen/vim-doge', 
+  Plug 'vim-airline/vim-airline'
+  Plug 'kkoomen/vim-doge', {'do': { -> doge#install({ 'headless': 1 }) }}
   Plug 'neoclide/jsonc.vim'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'gruvbox-community/gruvbox'

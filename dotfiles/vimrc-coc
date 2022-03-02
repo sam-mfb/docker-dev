@@ -25,6 +25,7 @@ let g:polyglot_disabled = ['tsx']
 call plug#begin('~/.vim/plugged')
   Plug 'junegunn/fzf'
   Plug 'junegunn/fzf.vim'
+  Plug 'vim-airline/vim-airline'
   Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
   Plug 'neoclide/jsonc.vim'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -98,6 +99,10 @@ autocmd VimLeave * silent !echo -ne "\e[5 q"
 
 "Vim-Doge Options
 let g:doge_mapping = '<Leader>d'
+let g:doge_javascript_settings = {
+\  'destructuring_props': 1,
+\  'omit_redundant_param_types': 1,
+\}
 
 "FastFold Options
 nmap zuz <Plug>(FastFoldUpdate)
@@ -223,7 +228,7 @@ nnoremap <silent> <c-p> :Files<CR>
 
 " per
 " https://vi.stackexchange.com/questions/21924/how-can-i-hide-and-scroll-popup-window-in-coc-nvim-in-vim/21927#21927
-" see also .vim/autoload/misc.vim
+" see also .vim/autoload/popup_scroll.vim
 nnoremap <expr> <c-d> popup_scroll#scroll_cursor_popup(1) ? '<esc>' : '<c-d>'
 nnoremap <expr> <c-u> popup_scroll#scroll_cursor_popup(0) ? '<esc>' : '<c-u>'
 set belloff+=esc

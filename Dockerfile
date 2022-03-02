@@ -78,6 +78,11 @@ COPY dotfiles/coc-settings.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 # assumes we are running a rush repo; uncomment this line and the rush install line if not
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
+WORKDIR /home/devuser
+
+# TS Image preconfigured for Align
+
+FROM ts-dev AS ts-dev-align
 ARG GIT_REPO
 ARG CLONE_DIR
 # mount the ssh-agent port as the current user for purposes of cloning private repos
