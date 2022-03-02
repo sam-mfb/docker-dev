@@ -42,6 +42,17 @@ RUN yarn install
 RUN yarn binary-build --version "$(jq -r .version < package.json)" 2>&1 > ./build.docker.log && yarn binary-zip
 RUN cp -a /tmp/cypress-build/linux/build/Cypress /Cypress
 
+## Vim-doge build image
+
+FROM node:16-bullseye-slim AS vim-doge-build
+RUN apt-get update
+RUN apt-get install -y git vim make g++ python3
+RUN git clone https://github.com/kkoomen/vim-doge.git
+WORKDIR vim-doge
+RUN mkdir bin
+RUN npm install
+RUN npm run build
+
 # .NET Core Development Image
 
 FROM base AS dotnet-dev
@@ -76,6 +87,8 @@ RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-js
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
+RUN rm -rf /home/devuser/.vim/plugged/vim-doge
+COPY --chown=devuser --from=vim-doge-build /vim-doge /home/devuser/.vim/plugged/vim-doge
 # assumes we are running a rush repo; uncomment this line and the rush install line if not
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
 WORKDIR /home/devuser
