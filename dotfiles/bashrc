@@ -1,3 +1,5 @@
+source /etc/skel/.bashrc
+
 ## commands relative to root of current git repository
 
 # navigate to root of repository
