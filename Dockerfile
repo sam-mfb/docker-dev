@@ -110,7 +110,11 @@ VOLUME /home/devuser/$CLONE_DIR
 
 FROM swiftlang/swift:nightly-5.6-focal AS swift-base
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales
+RUN apt-get -y install software-properties-common git python3
+RUN add-apt-repository ppa:jonathonf/vim
+RUN apt-get update
+RUN apt-get -y install vim-common=2:8.2.2815-0york0~20.04 vim-runtime=2:8.2.2815-0york0~20.04 vim=2:8.2.2815-0york0~20.04
+RUN apt-get -y install tmux fzf ripgrep curl ssh sqlite3 sudo locales
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
@@ -143,11 +147,11 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | b
 && nvm install lts/gallium
 # uncomment to use cyrpress from source
 #COPY --chown=devuser --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
-COPY dotfiles/vimrc-coc-install .vimrc
+COPY dotfiles/vimrc-swift-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
-COPY dotfiles/vimrc-coc .vimrc
+COPY dotfiles/vimrc-swift .vimrc
 RUN mkdir -pv /home/devuser/.config/coc
 RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-yaml coc-sourcekit' +qa
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
-COPY dotfiles/coc-settings.json .vim/coc-settings.json
+COPY dotfiles/coc-settings.swift.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
