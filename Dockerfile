@@ -105,3 +105,49 @@ RUN rush install
 # needed to work around a quirk in our repo where rush install generates a non-ignored script file
 RUN git reset --hard
 VOLUME /home/devuser/$CLONE_DIR
+
+# Swift linux development
+
+FROM swiftlang/swift:nightly-5.6-focal AS swift-base
+RUN apt-get update
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+WORKDIR /home/devuser
+ENV TERM="xterm-256color"
+COPY dotfiles/tmux.conf .tmux.conf
+ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash .git-completion.bash
+ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh .git-prompt.sh
+COPY dotfiles/bashrc .bashrc
+COPY .gitconfig .gitconfig
+# Package to allow easy tmux/vim navigation
+RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
+RUN chown -R devuser /home/devuser
+USER devuser
+RUN mkdir -p -m 0700 ~/.ssh
+# Add public keys for well known repos
+RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
+RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
+ENTRYPOINT bash
+SHELL ["/bin/bash", "--login", "-c"]
+# install nvm with a specified version of node; could use a node base image, but this is
+# more flexible
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+&& . ~/.nvm/nvm.sh \
+&& nvm install lts/gallium
+# uncomment to use cyrpress from source
+#COPY --chown=devuser --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
+COPY dotfiles/vimrc-coc-install .vimrc
+RUN vim +'PlugInstall --sync' +qa
+COPY dotfiles/vimrc-coc .vimrc
+RUN mkdir -pv /home/devuser/.config/coc
+RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-yaml coc-sourcekit' +qa
+RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
+COPY dotfiles/coc-settings.json .vim/coc-settings.json
+COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
