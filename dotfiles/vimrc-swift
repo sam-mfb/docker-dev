@@ -23,12 +23,15 @@ call plug#begin('~/.vim/plugged')
   Plug 'neoclide/jsonc.vim'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'gruvbox-community/gruvbox'
-  Plug 'sheerun/vim-polyglot'
+  Plug 'keith/swift.vim'
   Plug 'mhartington/oceanic-next'
   Plug 'tomasiser/vim-code-dark'
+  Plug 'vim-syntastic/syntastic'
 call plug#end()
 
 let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-sourcekit', 'coc-yaml']
+
+let g:syntastic_swift_checkers = ['swiftpm', 'swiftlint']
 
 syntax enable
 set number

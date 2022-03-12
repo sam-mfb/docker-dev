@@ -106,9 +106,25 @@ RUN rush install
 RUN git reset --hard
 VOLUME /home/devuser/$CLONE_DIR
 
+# Swift build SwiftLint
+
+FROM swiftlang/swift:nightly-5.6-focal AS swiftlint-build
+RUN apt-get update
+RUN apt-get install -y clang libblocksruntime0 libcurl4-openssl-dev libxml2-dev git
+RUN git clone https://github.com/realm/SwiftLint.git
+WORKDIR SwiftLint
+RUN ln -s /usr/lib/swift/_InternalSwiftSyntaxParser .
+ARG SWIFT_FLAGS="-c release -Xswiftc -static-stdlib -Xlinker -lCFURLSessionInterface -Xlinker -lCFXMLInterface -Xlinker -lcurl -Xlinker -lxml2 -Xswiftc -I. -Xlinker -fuse-ld=lld -Xlinker -L/usr/lib/swift/linux"
+RUN swift build $SWIFT_FLAGS
+RUN mkdir -p /executables
+RUN for executable in $(swift package completion-tool list-executables); do \
+        install -v `swift build $SWIFT_FLAGS --show-bin-path`/$executable /executables; \
+    done
+
 # Swift linux development
 
 FROM swiftlang/swift:nightly-5.6-focal AS swift-base
+#COPY --from=swiftlint-build /executables /usr/local/bin/swiftlint
 RUN apt-get update
 RUN apt-get -y install software-properties-common git python3
 RUN add-apt-repository ppa:jonathonf/vim

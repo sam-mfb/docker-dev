@@ -11,7 +11,8 @@ call plug#begin('~/.vim/plugged')
   Plug 'neoclide/jsonc.vim'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'gruvbox-community/gruvbox'
-  Plug 'sheerun/vim-polyglot'
+  Plug 'keith/swift.vim'
   Plug 'mhartington/oceanic-next'
   Plug 'tomasiser/vim-code-dark'
+  Plug 'vim-syntastic/syntastic'
 call plug#end()
