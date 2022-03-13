@@ -113,18 +113,16 @@ RUN apt-get update
 RUN apt-get install -y clang libblocksruntime0 libcurl4-openssl-dev libxml2-dev git
 RUN git clone https://github.com/realm/SwiftLint.git
 WORKDIR SwiftLint
-RUN ln -s /usr/lib/swift/_InternalSwiftSyntaxParser .
-ARG SWIFT_FLAGS="-c release -Xswiftc -static-stdlib -Xlinker -lCFURLSessionInterface -Xlinker -lCFXMLInterface -Xlinker -lcurl -Xlinker -lxml2 -Xswiftc -I. -Xlinker -fuse-ld=lld -Xlinker -L/usr/lib/swift/linux"
+RUN git checkout 0.46.5 
+ARG SWIFT_FLAGS="-c release"
 RUN swift build $SWIFT_FLAGS
 RUN mkdir -p /executables
-RUN for executable in $(swift package completion-tool list-executables); do \
-        install -v `swift build $SWIFT_FLAGS --show-bin-path`/$executable /executables; \
-    done
+RUN mv $(swift build $SWIFT_FLAGS --show-bin-path)/swiftlint /executables
 
 # Swift linux development
 
 FROM swiftlang/swift:nightly-5.6-focal AS swift-base
-#COPY --from=swiftlint-build /executables /usr/local/bin/swiftlint
+COPY --from=swiftlint-build /executables/swiftlint /usr/bin/swiftlint
 RUN apt-get update
 RUN apt-get -y install software-properties-common git python3
 RUN add-apt-repository ppa:jonathonf/vim
@@ -161,8 +159,6 @@ SHELL ["/bin/bash", "--login", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
 && . ~/.nvm/nvm.sh \
 && nvm install lts/gallium
-# uncomment to use cyrpress from source
-#COPY --chown=devuser --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
 COPY dotfiles/vimrc-swift-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-swift .vimrc
