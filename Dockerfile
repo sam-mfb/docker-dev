@@ -1,8 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim AS base
 RUN apt-get update
 RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales
-# cypress dependencies
-RUN apt-get -y install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
@@ -27,20 +25,6 @@ RUN mkdir -p -m 0700 ~/.ssh
 RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 ENTRYPOINT bash
-
-## Cypress build image
-
-FROM node:16-bullseye-slim AS cypress-build
-RUN apt-get update
-RUN apt-get install -y git vim jq zip unzip gcc
-RUN apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-RUN apt-get install -y libgtk-3-dev 
-RUN git clone https://github.com/cypress-io/cypress.git
-WORKDIR cypress
-RUN git checkout tags/v9.3.1 -b build-branch
-RUN yarn install
-RUN yarn binary-build --version "$(jq -r .version < package.json)" 2>&1 > ./build.docker.log && yarn binary-zip
-RUN cp -a /tmp/cypress-build/linux/build/Cypress /Cypress
 
 ## Vim-doge build image
 
@@ -77,8 +61,6 @@ SHELL ["/bin/bash", "--login", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
 && . ~/.nvm/nvm.sh \
 && nvm install lts/gallium
-# uncomment to use cyrpress from source
-#COPY --chown=devuser --from=cypress-build /Cypress/ /home/devuser/.cache/Cypress/9.3.1/Cypress
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
@@ -89,8 +71,6 @@ COPY dotfiles/coc-settings.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 RUN rm -rf /home/devuser/.vim/plugged/vim-doge
 COPY --chown=devuser --from=vim-doge-build /vim-doge /home/devuser/.vim/plugged/vim-doge
-# assumes we are running a rush repo; uncomment this line and the rush install line if not
-RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
 WORKDIR /home/devuser
 
 # TS Image preconfigured for Align
@@ -100,6 +80,7 @@ ARG GIT_REPO
 ARG CLONE_DIR
 # mount the ssh-agent port as the current user for purposes of cloning private repos
 RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
+RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
 WORKDIR /home/devuser/${CLONE_DIR}
 RUN rush install
 # needed to work around a quirk in our repo where rush install generates a non-ignored script file
