@@ -1,6 +1,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim AS base
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release
+# Install docker cli
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN apt-get update
+RUN apt-get -y install docker-ce-cli
+# Make buildx the default builder
+RUN docker buildx install
+# Give container user access to docker socket (which will be bound at container run time)
+RUN touch /var/run/docker.sock
+RUN chown root:sudo /var/run/docker.sock
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen

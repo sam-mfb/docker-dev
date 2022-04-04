@@ -30,7 +30,7 @@ fi
 # run container if not created, otherwise attach to existing
 if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" == "" ]]; then
     echo "Creating and running container..."
-    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=${HOME}/.ssh,target=${DOCKER_USER_HOME}/.ssh --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -h ${HOSTNAME} -it ${IMAGE_TAG}
+    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=${HOME}/.ssh,target=${DOCKER_USER_HOME}/.ssh --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -h ${HOSTNAME} -it ${IMAGE_TAG}
 else
     echo "Starting and attaching to existing container..."
     docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
