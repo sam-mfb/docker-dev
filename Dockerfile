@@ -10,7 +10,7 @@ RUN apt-get -y install docker-ce-cli
 RUN docker buildx install
 # Give container user access to docker socket (which will be bound at container run time)
 RUN touch /var/run/docker.sock
-RUN chown root:sudo /var/run/docker.sock
+RUN chgrp sudo /var/run/docker.sock
 # Install docker compose v2
 RUN curl -L "https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
 RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
