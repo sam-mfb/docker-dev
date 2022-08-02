@@ -38,7 +38,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'maxmellon/vim-jsx-pretty' 
 call plug#end()
 
-let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml']
+let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml', 'coc-snippet']
 
 syntax enable
 set number
@@ -154,22 +154,20 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+" tab completion
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+  \ coc#pum#visible() ? coc#_select_confirm() :
+  \ coc#expandableOrJumpable() ?
+  \ "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+  \ <SID>check_back_space() ? "\<TAB>" :
+  \ coc#refresh()
 
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
- " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+let g:coc_snippet_next = '<tab>'
 
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
@@ -232,3 +230,8 @@ nnoremap <silent> <c-p> :Files<CR>
 nnoremap <expr> <c-d> popup_scroll#scroll_cursor_popup(1) ? '<esc>' : '<c-d>'
 nnoremap <expr> <c-u> popup_scroll#scroll_cursor_popup(0) ? '<esc>' : '<c-u>'
 set belloff+=esc
+
+# fix autocomplete highlighting to be more legible
+highlight link CocMenuSel PmenuSel
+highlight link CocPumSearch Directory
+
