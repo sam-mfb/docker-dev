@@ -231,7 +231,6 @@ nnoremap <expr> <c-d> popup_scroll#scroll_cursor_popup(1) ? '<esc>' : '<c-d>'
 nnoremap <expr> <c-u> popup_scroll#scroll_cursor_popup(0) ? '<esc>' : '<c-u>'
 set belloff+=esc
 
-# fix autocomplete highlighting to be more legible
+" fix autocomplete highlighting to be more legible
 highlight link CocMenuSel PmenuSel
 highlight link CocPumSearch Directory
-
