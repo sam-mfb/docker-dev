@@ -52,3 +52,23 @@ Delete existing image
 `./run-x.sh -x`
 
 Delete both container and image
+
+## Electron
+
+Running Electron inside docker requires an XServer on the host.
+
+### On Mac --
+
+#### Setup
+
+- Install XQuartz via `brew install --cask xquartz`
+- Launch via `open -a XQuartz`
+- Set preferences in XQuartz to "Allow connections from network clients"
+- Restart the mac
+
+#### On each launch
+
+- Run /usr/bin/X11/xhost +localhost
+- The docker scripts here will handle
+  - Forwarding the DISPLAY port
+  - Using the chrome.js seccomp profile
