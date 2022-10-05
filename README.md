@@ -72,3 +72,4 @@ Running Electron inside docker requires an XServer on the host.
 - The docker scripts here will handle
   - Forwarding the DISPLAY port
   - Using the chrome.js seccomp profile
+    - added `statx` syscall to this to allow proper use of `ls`
