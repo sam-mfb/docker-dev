@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0-bullseye-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS base
 RUN apt-get update
 RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release chromium
 # Install docker cli
