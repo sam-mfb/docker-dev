@@ -73,3 +73,4 @@ Running Electron inside docker requires an XServer on the host.
   - Forwarding the DISPLAY port
   - Using the chrome.js seccomp profile
     - added `statx` syscall to this to allow proper use of `ls`
+    - added 'copy-file-range' to allow copying files

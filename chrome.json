@@ -102,6 +102,11 @@
             "args": null
         },
         {
+            "name": "copy_file_range",
+            "action": "SCMP_ACT_ALLOW",
+            "args": null
+        },
+        {
             "name": "creat",
             "action": "SCMP_ACT_ALLOW",
             "args": null
