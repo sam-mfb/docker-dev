@@ -1,9 +1,11 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS base
+FROM mcr.microsoft.com/playwright:v1.27.0-jammy as base 
+ARG DEBIAN_FRONTEND=noninteractive
+RUN yes | unminimize
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release chromium
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools
 # Install docker cli
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN apt-get update
 RUN apt-get -y install docker-ce-cli
 # Make buildx the default builder
@@ -30,6 +32,11 @@ RUN pip install azure-cli
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 WORKDIR /home/devuser
+## add mfb crt to chromium
+COPY /mfb-root-certificate.crt /home/devuser/server.crt
+RUN mkdir -p /root/.pki/nssdb
+RUN certutil -N --empty-password -d sql:/root/.pki/nssdb 
+RUN certutil -A -d sql:/root/.pki/nssdb -t "C,," -n server -i server.crt
 ENV TERM="xterm-256color"
 COPY dotfiles/tmux.conf .tmux.conf
 ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash .git-completion.bash
@@ -60,7 +67,9 @@ RUN npm run build
 
 # .NET Core Development Image
 
-FROM base AS dotnet-dev
+##FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS dotnet-dev
+## Will need to install dotnet manually if playwright is used
+FROM base as dotnet-dev
 COPY dotfiles/vimrc-omni-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
@@ -99,6 +108,7 @@ WORKDIR /home/devuser
 FROM ts-dev AS ts-dev-align
 ARG GIT_REPO
 ARG CLONE_DIR
+COPY dotfiles/sshconfig .ssh/config
 # mount the ssh-agent port as the current user for purposes of cloning private repos
 RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
