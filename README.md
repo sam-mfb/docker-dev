@@ -74,7 +74,11 @@ Running Electron inside docker requires an XServer on the host.
   - Using the chrome.js seccomp profile
     - added `statx` syscall to this to allow proper use of `ls`
     - added 'copy-file-range' to allow copying files
+    - added 'ptrace' to allow using strace
+    - added 'faccesssat2' to allow tmux to create streams
 
-## Errata
+(can run strace -c to see what other syscalls are in use)
 
-on some ocntainers tmux needs to be called with -S /tmp/tmux (or any other path to a socket)
+## Chromium
+
+Call with `--disable-gpu` to get rid of graphics warnings. Call with `--disable-dev-shm` to avoid crashes.
