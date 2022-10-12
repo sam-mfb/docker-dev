@@ -116,6 +116,8 @@ WORKDIR /home/devuser/${CLONE_DIR}
 RUN rush install
 # needed to work around a quirk in our repo where rush install generates a non-ignored script file
 RUN git reset --hard
+# deps for webkit browser
+RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
 VOLUME /home/devuser/$CLONE_DIR
 
 # Swift build SwiftLint

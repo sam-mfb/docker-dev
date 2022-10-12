@@ -97,6 +97,11 @@
       "args": null
     },
     {
+      "name": "close_range",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "connect",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -968,6 +973,11 @@
     },
     {
       "name": "rmdir",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "rseq",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     },

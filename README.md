@@ -76,6 +76,7 @@ Running Electron inside docker requires an XServer on the host.
     - added 'copy-file-range' to allow copying files
     - added 'ptrace' to allow using strace
     - added 'faccesssat2' to allow tmux to create streams
+    - added 'rseq' and 'close_range" to allow WebKit gtk browser to run
 
 (can run strace -c to see what other syscalls are in use)
 
