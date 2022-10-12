@@ -30,7 +30,14 @@ fi
 # run container if not created, otherwise attach to existing
 if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" == "" ]]; then
     echo "Creating and running container..."
-    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=${HOME}/.ssh,target=${DOCKER_USER_HOME}/.ssh --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=chrome.json -h ${HOSTNAME} -it ${IMAGE_TAG}
+    # Options:
+    #  - bind ssh to share keys and config
+    #  - bind docker socket to allow docker within docker simulation
+    #  - increase /dev/shm size as chrome needs a lot
+    #  - disable default behavior of ctrz so it can be used in shell
+    #  - set DISPLAY env so we can use XServer over the network
+    #  - use a custome seccomp profile that enables chrome sandbox
+    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=${HOME}/.ssh,target=${DOCKER_USER_HOME}/.ssh --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=chrome.json -h ${HOSTNAME} -it ${IMAGE_TAG}
 else
     echo "Starting and attaching to existing container..."
     docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}

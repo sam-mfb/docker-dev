@@ -81,4 +81,5 @@ Running Electron inside docker requires an XServer on the host.
 
 ## Chromium
 
-Call with `--disable-gpu` to get rid of graphics warnings. Call with `--disable-dev-shm` to avoid crashes.
+- Call with `--disable-gpu` to get rid of graphics warnings.
+- Set shm size to 2gb via docker run. Alternatively, call with `--disable-dev-shm-usage` to avoid crashes from too small shm size
