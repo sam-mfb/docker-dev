@@ -32,11 +32,6 @@ RUN pip install azure-cli
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 WORKDIR /home/devuser
-## add mfb crt to chromium
-COPY /mfb-root-certificate.crt /home/devuser/server.crt
-RUN mkdir -p /root/.pki/nssdb
-RUN certutil -N --empty-password -d sql:/root/.pki/nssdb 
-RUN certutil -A -d sql:/root/.pki/nssdb -t "C,," -n server -i server.crt
 ENV TERM="xterm-256color"
 COPY dotfiles/tmux.conf .tmux.conf
 ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash .git-completion.bash
@@ -47,10 +42,16 @@ COPY .gitconfig .gitconfig
 RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
 RUN chown -R devuser /home/devuser
 USER devuser
+## add mfb crt to chromium
+COPY /mfb-root-certificate.crt /home/devuser/server.crt
+RUN mkdir -p /home/devuser/.pki/nssdb
+RUN certutil -N --empty-password -d sql:/home/devuser/.pki/nssdb 
+RUN certutil -A -d sql:/home/devuser/.pki/nssdb -t "C,," -n server -i server.crt
 RUN mkdir -p -m 0700 ~/.ssh
 # Add public keys for well known repos
 RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
+COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
 ENTRYPOINT bash
 
@@ -108,7 +109,6 @@ WORKDIR /home/devuser
 FROM ts-dev AS ts-dev-align
 ARG GIT_REPO
 ARG CLONE_DIR
-COPY dotfiles/sshconfig .ssh/config
 # mount the ssh-agent port as the current user for purposes of cloning private repos
 RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
