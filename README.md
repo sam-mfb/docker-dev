@@ -74,3 +74,7 @@ Running Electron inside docker requires an XServer on the host.
   - Using the chrome.js seccomp profile
     - added `statx` syscall to this to allow proper use of `ls`
     - added 'copy-file-range' to allow copying files
+
+## Errata
+
+on some ocntainers tmux needs to be called with -S /tmp/tmux (or any other path to a socket)
