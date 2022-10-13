@@ -68,9 +68,18 @@ RUN npm run build
 
 # .NET Core Development Image
 
-##FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim AS dotnet-dev
-## Will need to install dotnet manually if playwright is used
 FROM base as dotnet-dev
+## No arm64 version yet...
+# RUN wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+# RUN sudo dpkg -i packages-microsoft-prod.deb
+# RUN rm packages-microsoft-prod.deb
+# COPY dotfiles/apt.pref.dotnet6 /etc/apt/preferences
+# RUN sudo apt update 
+# RUN sudo apt -y install dotnet-sdk-6.0
+RUN wget https://download.visualstudio.microsoft.com/download/pr/a567a07f-af9d-451a-834c-a746ac299e6b/1d9d74b54cf580f93cad71a6bf7b32be/dotnet-sdk-6.0.401-linux-arm64.tar.gz
+RUN mkdir -p $HOME/dotnet && tar zxf dotnet-sdk-6.0.401-linux-arm64.tar.gz -C $HOME/dotnet
+RUN export PATH=$PATH:$HOME/dotnet
+RUN export DOTNET_ROOT=$HOME/dotnet
 COPY dotfiles/vimrc-omni-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
@@ -81,7 +90,7 @@ ARG CLONE_DIR
 # mount the ssh-agent port as the current user for purposes of cloning private repos
 RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 WORKDIR /home/devuser/${CLONE_DIR}
-RUN dotnet restore
+RUN $HOME/dotnet/dotnet restore
 
 # TypeScript Development Image
 

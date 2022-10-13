@@ -23,3 +23,6 @@ source ~/.git-completion.bash
 # export GIT_PS1_SHOWUNTRACKEDFILES="true"
 # export GIT_PS1_SHOWUPSTREAM="auto"
 # export PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
+
+export PATH=$PATH:$HOME/dotnet
+export DOTNET_ROOT=$HOME/dotnet
