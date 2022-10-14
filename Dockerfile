@@ -82,6 +82,7 @@ RUN export DOTNET_ROOT=$HOME/dotnet
 # </ItemGroup>
 # This ensure that the extension lib called by dotnet matches the interop lib compiled here
 COPY ./sqlite-netFx-source-1.0.116.0.zip sqlite-netFx-source-1.0.116.0.zip
+COPY ./sqlite-csproj.fragment sqlite-csproj.fragment
 RUN unzip ./sqlite-netFx-source-1.0.116.0.zip -d sqlite-source
 RUN bash ./sqlite-source/Setup/compile-interop-assembly-release.sh
 WORKDIR /home/devuser/sqlite-source/System.Data.SQLite
