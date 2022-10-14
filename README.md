@@ -53,31 +53,36 @@ Delete existing image
 
 Delete both container and image
 
-## Electron
+## XServer
 
-Running Electron inside docker requires an XServer on the host.
+Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer on the host.
 
 ### On Mac --
-
-#### Setup
 
 - Install XQuartz via `brew install --cask xquartz`
 - Launch via `open -a XQuartz`
 - Set preferences in XQuartz to "Allow connections from network clients"
 - Restart the mac
-
-#### On each launch
-
+- Start XQuartz
 - Run /usr/bin/X11/xhost +localhost
-- The docker scripts here will handle
-  - Forwarding the DISPLAY port
-  - Using the chrome.js seccomp profile
+
+### On Windows --
+
+- Install Cygwin/X (cygwin installer and choose xinit and xhost)
+- Change the XWin Server shortcut to add `-- -list tcp` as a command option
+- Start XWin Server (allow private network access only)
+- In Cygwin terminal run: `DISPLAY=localhost:0.0 xhost +localhost` 
+
+## Seccomp
+
+Using the chrome.js seccomp profile, with the following modifications:
+
     - added `statx` syscall to this to allow proper use of `ls`
     - added 'copy-file-range' to allow copying files
     - added 'ptrace' to allow using strace
     - added 'faccesssat2' to allow tmux to create streams
     - added 'rseq' and 'close_range" to allow WebKit gtk browser to run
-    - added 'clone3' to avoid pthread creation on Windows
+    - added 'clone3' to allow pthread creation on Windows
 
 (can run strace -c to see what other syscalls are in use)
 
