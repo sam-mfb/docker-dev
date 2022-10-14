@@ -9,6 +9,7 @@ Dockerfile and scripts to setup a linux dev environment pre-configured for using
 - Copy your `.gitconfig` file into the root of this repo (will not be committed to version control)
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
 - Use the existing `run-[x]` scripts or create your own `run-[x].sh` script based on them
+- On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
 
 ## run-[x].sh scripts
 
