@@ -101,6 +101,21 @@ RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 WORKDIR /home/devuser/${CLONE_DIR}
 RUN $HOME/dotnet/dotnet restore
 
+FROM base as dotnet-dev-x64
+RUN sudo apt update && sudo apt install -y dotnet6
+WORKDIR /home/devuser
+COPY dotfiles/vimrc-omni-install .vimrc
+RUN vim +'PlugInstall --sync' +qa
+COPY dotfiles/vimrc-omni .vimrc
+# pre-install the Omnisharp-Roslyn engine
+RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
+ARG GIT_REPO
+ARG CLONE_DIR
+# mount the ssh-agent port as the current user for purposes of cloning private repos
+RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
+WORKDIR /home/devuser/${CLONE_DIR}
+RUN dotnet restore
+
 # TypeScript Development Image
 
 FROM base AS ts-dev
