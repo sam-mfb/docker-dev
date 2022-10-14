@@ -69,17 +69,25 @@ RUN npm run build
 # .NET Core Development Image
 
 FROM base as dotnet-dev
-## No arm64 version yet...
-# RUN wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-# RUN sudo dpkg -i packages-microsoft-prod.deb
-# RUN rm packages-microsoft-prod.deb
-# COPY dotfiles/apt.pref.dotnet6 /etc/apt/preferences
-# RUN sudo apt update 
-# RUN sudo apt -y install dotnet-sdk-6.0
+## No arm64 version yet...so we have to install from binaries rather than from the repo
 RUN wget https://download.visualstudio.microsoft.com/download/pr/a567a07f-af9d-451a-834c-a746ac299e6b/1d9d74b54cf580f93cad71a6bf7b32be/dotnet-sdk-6.0.401-linux-arm64.tar.gz
 RUN mkdir -p $HOME/dotnet && tar zxf dotnet-sdk-6.0.401-linux-arm64.tar.gz -C $HOME/dotnet
 RUN export PATH=$PATH:$HOME/dotnet
 RUN export DOTNET_ROOT=$HOME/dotnet
+# Compile and install sqlite interop and extension (to get arm64 compatability
+# NB: You will have to modify the csproj that uses System.Data.SQLite.Core to remove that
+# ProjectReference and instead add this to the root of the csproj file:
+# <ItemGroup>
+#   <Reference Include="..\..\sqlite-source\bin\NetStandard21\ReleaseNetStandard21\bin\netstandard2.1\System.Data.SQLite.dll" />
+# </ItemGroup>
+# This ensure that the extension lib called by dotnet matches the interop lib compiled here
+COPY ./sqlite-netFx-source-1.0.116.0.zip sqlite-netFx-source-1.0.116.0.zip
+RUN unzip ./sqlite-netFx-source-1.0.116.0.zip -d sqlite-source
+RUN bash ./sqlite-source/Setup/compile-interop-assembly-release.sh
+WORKDIR /home/devuser/sqlite-source/System.Data.SQLite
+RUN $HOME/dotnet/dotnet build -c Release System.Data.SQLite.NetStandard21.csproj
+WORKDIR /home/devuser
+RUN sudo cp ./sqlite-source/bin/2013/Release/bin/SQLite.Interop.dll /usr/lib/libSQLite.Interop.dll
 COPY dotfiles/vimrc-omni-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
