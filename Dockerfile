@@ -70,8 +70,9 @@ RUN npm run build
 
 FROM base as dotnet-dev
 ## No arm64 version yet...so we have to install from binaries rather than from the repo
-RUN wget https://download.visualstudio.microsoft.com/download/pr/a567a07f-af9d-451a-834c-a746ac299e6b/1d9d74b54cf580f93cad71a6bf7b32be/dotnet-sdk-6.0.401-linux-arm64.tar.gz
-RUN mkdir -p $HOME/dotnet && tar zxf dotnet-sdk-6.0.401-linux-arm64.tar.gz -C $HOME/dotnet
+RUN wget https://dot.net/v1/dotnet-install.sh
+RUN mkdir -p $HOME/dotnet 
+RUN bash ./dotnet-install.sh --install-dir $HOME/dotnet
 RUN export PATH=$PATH:$HOME/dotnet
 RUN export DOTNET_ROOT=$HOME/dotnet
 # Compile and install sqlite interop and extension (to get arm64 compatability
@@ -101,6 +102,7 @@ RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 WORKDIR /home/devuser/${CLONE_DIR}
 RUN $HOME/dotnet/dotnet restore
 
+# simplified x64 version where things are simpler...
 FROM base as dotnet-dev-x64
 RUN sudo apt update && sudo apt install -y dotnet6
 WORKDIR /home/devuser
