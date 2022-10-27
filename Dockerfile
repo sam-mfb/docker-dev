@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/playwright:v1.27.0-jammy as base
 ARG DEBIAN_FRONTEND=noninteractive
 RUN yes | unminimize
 RUN apt-get update
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -41,6 +41,10 @@ COPY .gitconfig .gitconfig
 # Package to allow easy tmux/vim navigation
 RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
 RUN chown -R devuser /home/devuser
+# used by dbus/chrome
+RUN mkdir /run/user/1002
+RUN sudo chmod 700 /run/user/1002
+RUN sudo chown devuser /run/user/1002
 USER devuser
 ## add mfb crt to chromium
 COPY /mfb-root-certificate.crt /home/devuser/server.crt
