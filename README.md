@@ -1,5 +1,4 @@
 # docker-dev
-
 Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE. Currently has images for TypeScript, Swift (both using coc-nvim) and C#/.NET Core (using omnisharp-vim)
 
 ## Setup
@@ -70,7 +69,7 @@ Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer
 ### On Windows --
 
 - Install Cygwin/X (cygwin installer and choose xinit and xhost)
-- Change the XWin Server shortcut to add `-- -list tcp` as a command option
+- Change the XWin Server shortcut to add `-- -listen tcp` as a command option
 - Start XWin Server (allow private network access only)
 - In Cygwin terminal run: `DISPLAY=localhost:0.0 xhost +localhost` 
 
