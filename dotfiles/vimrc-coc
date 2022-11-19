@@ -234,3 +234,9 @@ set belloff+=esc
 " fix autocomplete highlighting to be more legible
 highlight link CocMenuSel PmenuSel
 highlight link CocPumSearch Directory
+highlight link CocSearch Directory
+highlight link CocMarkdownLink Directory
+highlight link CocNotificationProgress Directory
+highlight link CocPumVirtualText Directory
+highlight link CocFloatDividingLine Directory
+
