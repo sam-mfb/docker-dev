@@ -1565,6 +1565,21 @@
       "name": "writev",
       "action": "SCMP_ACT_ALLOW",
       "args": null
+    },
+    {
+      "name": "add_key",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "keyctl",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "request_key",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
     }
   ]
 }
