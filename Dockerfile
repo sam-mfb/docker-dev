@@ -36,7 +36,6 @@ RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN chmod +x /opt/microsoft/powershell/7/pwsh
 RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
-RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
 #setup dev user
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -55,6 +54,8 @@ RUN mkdir /run/user/1002
 RUN sudo chmod 700 /run/user/1002
 RUN sudo chown devuser /run/user/1002
 USER devuser
+# install powershell modules
+RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
 ## add mfb crt to chromium
 COPY /mfb-root-certificate.crt /home/devuser/server.crt
 RUN mkdir -p /home/devuser/.pki/nssdb
