@@ -29,6 +29,15 @@ ENV LC_ALL en_US.UTF-8
 RUN apt-get update
 RUN apt-get -y install pip
 RUN pip install azure-cli
+# install powershell
+RUN mkdir -p /opt/microsoft/powershell/7
+RUN curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.3.1/powershell-7.3.1-linux-$(dpkg --print-architecture).tar.gz" -o /opt/microsoft/powershell.tar.gz
+RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
+RUN chmod +x /opt/microsoft/powershell/7/pwsh
+RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
+RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
+#setup dev user
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 WORKDIR /home/devuser
