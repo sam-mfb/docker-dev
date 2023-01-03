@@ -3,7 +3,7 @@
 run_func () {
 # flags to easily delete image and container
 local OPTIND o a
-while getopts ":krx" option; do
+while getopts ":krxb" option; do
     case $option in
         k)
             echo "Deleting container..."
@@ -18,6 +18,11 @@ while getopts ":krx" option; do
             docker container rm ${CONTAINER_NAME}
             docker rmi ${IMAGE_TAG}
             exit;;
+        b)
+            if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
+                echo "Building image (no-cache)..."
+                docker build --no-cache --ssh default --pull --build-arg GIT_REPO=${GIT_REPO} --build-arg CLONE_DIR=${CLONE_DIR} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
+            fi
     esac
 done
 
