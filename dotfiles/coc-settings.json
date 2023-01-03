@@ -10,6 +10,8 @@
     "markdown"
   ],
   "powershell.integratedConsole.showOnStartup": false,
+  "powershell.codeFormatting.preset": "Allman",
+  "powershell.codeFormatting.useCorrectCasing": true,
   "cSpell.userWords": [
     "API's",
     "DATETIME",

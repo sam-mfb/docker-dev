@@ -132,9 +132,9 @@ RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 WORKDIR /home/devuser/${CLONE_DIR}
 RUN dotnet restore
 
-# TypeScript Development Image
+# Coc Development Image
 
-FROM base AS ts-dev
+FROM base AS coc-dev
 SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
@@ -145,7 +145,7 @@ COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
 RUN mkdir -pv /home/devuser/.config/coc
-RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml coc-snippets' +qa
+RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml coc-snippets coc-powershell' +qa
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
@@ -153,9 +153,9 @@ RUN rm -rf /home/devuser/.vim/plugged/vim-doge
 COPY --chown=devuser --from=vim-doge-build /vim-doge /home/devuser/.vim/plugged/vim-doge
 WORKDIR /home/devuser
 
-# TS Image preconfigured for Align
+# Coc Image preconfigured for Align Typescript development
 
-FROM ts-dev AS ts-dev-align
+FROM coc-dev AS ts-dev-align
 ARG GIT_REPO
 ARG CLONE_DIR
 # mount the ssh-agent port as the current user for purposes of cloning private repos
@@ -167,6 +167,16 @@ RUN rush install
 RUN git reset --hard
 # deps for webkit browser
 RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
+VOLUME /home/devuser/$CLONE_DIR
+
+# Coc Image preconfigured for Align PowerShell development
+
+FROM coc-dev AS pwsh-dev-align
+ARG GIT_REPO
+ARG CLONE_DIR
+# mount the ssh-agent port as the current user for purposes of cloning private repos
+RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
+WORKDIR /home/devuser/${CLONE_DIR}
 VOLUME /home/devuser/$CLONE_DIR
 
 # Swift build SwiftLint
