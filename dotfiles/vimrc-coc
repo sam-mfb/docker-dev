@@ -38,7 +38,7 @@ call plug#begin('~/.vim/plugged')
   Plug 'maxmellon/vim-jsx-pretty' 
 call plug#end()
 
-let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml', 'coc-snippets']
+let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml', 'coc-snippets', 'coc-powershell']
 
 syntax enable
 set number

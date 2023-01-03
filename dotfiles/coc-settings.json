@@ -9,6 +9,7 @@
     "scss",
     "markdown"
   ],
+  "powershell.integratedConsole.showOnStartup": false,
   "cSpell.userWords": [
     "API's",
     "DATETIME",
