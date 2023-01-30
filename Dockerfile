@@ -31,7 +31,8 @@ RUN apt-get -y install pip
 RUN pip install azure-cli
 # install powershell
 RUN mkdir -p /opt/microsoft/powershell/7
-RUN curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.3.1/powershell-7.3.1-linux-$(dpkg --print-architecture).tar.gz" -o /opt/microsoft/powershell.tar.gz
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
+    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.3.2/powershell-7.3.2-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
 RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN chmod +x /opt/microsoft/powershell/7/pwsh
 RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
