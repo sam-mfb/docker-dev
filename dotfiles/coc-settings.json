@@ -9,6 +9,7 @@
     "scss",
     "markdown"
   ],
+  "tsserver.useLocalTsdk":true,
   "powershell.integratedConsole.showOnStartup": false,
   "powershell.codeFormatting.preset": "Allman",
   "powershell.codeFormatting.useCorrectCasing": true,
