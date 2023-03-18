@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.27.0-jammy as base 
+FROM mcr.microsoft.com/playwright:v1.30.0-jammy as base 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN yes | unminimize
 RUN apt-get update
