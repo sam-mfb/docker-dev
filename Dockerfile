@@ -14,9 +14,9 @@ RUN docker buildx install
 RUN touch /var/run/docker.sock
 RUN chgrp sudo /var/run/docker.sock
 # Install docker compose v2
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
 RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
-RUN curl -fL https://github.com/docker/compose-switch/releases/download/v1.0.4/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
+RUN curl -fL https://github.com/docker/compose-switch/releases/download/v1.0.5/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
 RUN chmod +x /usr/local/bin/compose-switch
 RUN update-alternatives --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99
 # Set the locale
@@ -139,7 +139,7 @@ FROM base AS coc-dev
 SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash \
 && . ~/.nvm/nvm.sh \
 && nvm install lts/gallium
 COPY dotfiles/vimrc-coc-install .vimrc
