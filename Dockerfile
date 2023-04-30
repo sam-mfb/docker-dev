@@ -62,8 +62,8 @@ COPY /mfb-root-certificate.crt /home/devuser/server.crt
 RUN mkdir -p /home/devuser/.pki/nssdb
 RUN certutil -N --empty-password -d sql:/home/devuser/.pki/nssdb 
 RUN certutil -A -d sql:/home/devuser/.pki/nssdb -t "C,," -n server -i server.crt
-RUN mkdir -p -m 0700 ~/.ssh
 # Add public keys for well known repos
+RUN mkdir -p -m 0700 ~/.ssh
 RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
@@ -242,3 +242,41 @@ RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.swift.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 COPY dotfiles/swiftlint.yml .swiftlint.yml
+
+## LISP development
+
+FROM debian:bullseye-slim as lisp-dev
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales sbcl
+# Set the locale
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+#setup dev user
+RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+WORKDIR /home/devuser
+ENV TERM="xterm-256color"
+COPY dotfiles/tmux.conf .tmux.conf
+ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash .git-completion.bash
+ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh .git-prompt.sh
+COPY dotfiles/bashrc .bashrc
+COPY .gitconfig .gitconfig
+## don't setup dbus (used in .bashrc)
+ENV NO_DBUS_CONFIG="true"
+# Package to allow easy tmux/vim navigation
+RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
+RUN chown -R devuser /home/devuser
+USER devuser
+# Add public keys for well known repos
+RUN mkdir -p -m 0700 ~/.ssh
+RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
+RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
+COPY dotfiles/sshconfig .ssh/config
+# Install slimv
+RUN git clone https://github.com/kovisoft/slimv.git ~/.vim/pack/plugins/start/slimv
+RUN vim +'helptags ~/.vim/pack/plugins/start/slimv/doc' +q
+ENTRYPOINT bash
