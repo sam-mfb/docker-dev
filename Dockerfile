@@ -218,7 +218,7 @@ ENTRYPOINT bash
 SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash \
 && . ~/.nvm/nvm.sh \
 && nvm install lts/hydrogen
 COPY dotfiles/vimrc-swift-install .vimrc
