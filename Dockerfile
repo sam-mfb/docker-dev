@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.30.0-jammy as base 
+FROM mcr.microsoft.com/playwright:v1.37.1-jammy as base 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN yes | unminimize
 RUN apt-get update
@@ -14,7 +14,7 @@ RUN docker buildx install
 RUN touch /var/run/docker.sock
 RUN chgrp sudo /var/run/docker.sock
 # Install docker compose v2
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
 RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 RUN curl -fL https://github.com/docker/compose-switch/releases/download/v1.0.5/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
 RUN chmod +x /usr/local/bin/compose-switch
@@ -32,7 +32,7 @@ RUN pip install azure-cli
 # install powershell
 RUN mkdir -p /opt/microsoft/powershell/7
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
-    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.3.2/powershell-7.3.2-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
+    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.3.6/powershell-7.3.6-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
 RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN chmod +x /opt/microsoft/powershell/7/pwsh
 RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
@@ -69,17 +69,6 @@ RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
 ENTRYPOINT bash
-
-## Vim-doge build image
-
-FROM node:16-bullseye-slim AS vim-doge-build
-RUN apt-get update
-RUN apt-get install -y git vim make g++ python3
-RUN git clone https://github.com/kkoomen/vim-doge.git
-WORKDIR vim-doge
-RUN mkdir bin
-RUN npm install
-RUN npm run build
 
 # .NET Core Development Image
 
@@ -139,9 +128,10 @@ FROM base AS coc-dev
 SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash \
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
 && . ~/.nvm/nvm.sh \
-&& nvm install lts/gallium
+&& nvm install lts/hydrogen
+RUN . ~/.nvm/nvm.sh && npm install -g npm@9.8.1
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
@@ -150,8 +140,6 @@ RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-js
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
-RUN rm -rf /home/devuser/.vim/plugged/vim-doge
-COPY --chown=devuser --from=vim-doge-build /vim-doge /home/devuser/.vim/plugged/vim-doge
 WORKDIR /home/devuser
 
 # Coc Image preconfigured for Align Typescript development
@@ -163,9 +151,9 @@ ARG CLONE_DIR
 RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
 WORKDIR /home/devuser/${CLONE_DIR}
-RUN rush install
-# needed to work around a quirk in our repo where rush install generates a non-ignored script file
-RUN git reset --hard
+## RUN rush install
+## # needed to work around a quirk in our repo where rush install generates a non-ignored script file
+## RUN git reset --hard
 # deps for webkit browser
 RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
 VOLUME /home/devuser/$CLONE_DIR
@@ -232,7 +220,7 @@ SHELL ["/bin/bash", "--login", "-c"]
 # more flexible
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
 && . ~/.nvm/nvm.sh \
-&& nvm install lts/gallium
+&& nvm install lts/hydrogen
 COPY dotfiles/vimrc-swift-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-swift .vimrc
