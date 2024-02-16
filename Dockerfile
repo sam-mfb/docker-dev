@@ -15,7 +15,7 @@ RUN docker buildx install
 RUN touch /var/run/docker.sock
 RUN chgrp sudo /var/run/docker.sock
 # Install docker compose v2
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
 RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 RUN curl -fL https://github.com/docker/compose-switch/releases/download/v1.0.5/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
 RUN chmod +x /usr/local/bin/compose-switch
@@ -33,7 +33,7 @@ RUN pip install azure-cli
 # install powershell
 RUN mkdir -p /opt/microsoft/powershell/7
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
-    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.3.6/powershell-7.3.6-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
+    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/powershell-7.4.1-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
 RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN chmod +x /opt/microsoft/powershell/7/pwsh
 RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
@@ -129,7 +129,7 @@ FROM base AS coc-dev
 SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash \
 && . ~/.nvm/nvm.sh \
 && nvm install lts/hydrogen
 RUN . ~/.nvm/nvm.sh && npm install -g npm@9.8.1
