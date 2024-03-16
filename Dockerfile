@@ -89,7 +89,7 @@ RUN git config --global credential.credentialStore cache
 RUN git config --global credential.cacheOptions "--timeout 36000"
 RUN git config --global credential.msauthFlow devicecode
 RUN git config --global credential.azreposCredentialType oauth
-ENTRYPOINT bash
+#ENTRYPOINT bash
 
 # .NET Core Development Image
 
@@ -142,6 +142,9 @@ FROM coc-dev AS ts-dev-align
 # deps for webkit browser
 RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
 RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
+ARG GIT_REPO
+ENV ALIGN_REPO=${GIT_REPO}
+CMD git clone ${ALIGN_REPO}
 
 # Coc Image preconfigured for Align PowerShell development
 

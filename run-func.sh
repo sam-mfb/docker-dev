@@ -21,7 +21,7 @@ while getopts ":krxb" option; do
         b)
             if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
                 echo "Building image (no-cache)..."
-                docker build --no-cache --pull --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
+                docker build --no-cache --pull --build-arg GIT_REPO=${GIT_REPO} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
             fi
     esac
 done
@@ -29,7 +29,7 @@ done
 # build image if not built already
 if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
     echo "Building image..."
-    docker build --pull --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
+    docker build --pull --build-arg GIT_REPO=${GIT_REPO} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
 fi
 
 # run container if not created, otherwise attach to existing

@@ -7,7 +7,7 @@ DOCKER_USER_HOME="/home/devuser"
 HOST_PORTS="3002"
 CONTAINER_PORTS="3000"
 HOSTNAME="ts-docker"
-GIT_REPO="git@ssh.dev.azure.com:v3/MFBTech/Syzygy%20Web%20App/align-ts"
+GIT_REPO="https://MFBTech@dev.azure.com/MFBTech/Syzygy%20Web%20App/_git/align-ts"
 CLONE_DIR="align-ts"
 
 source ./run-func.sh
