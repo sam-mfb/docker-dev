@@ -141,6 +141,7 @@ WORKDIR /home/devuser
 FROM coc-dev AS ts-dev-align
 # deps for webkit browser
 RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
+RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
 
 # Coc Image preconfigured for Align PowerShell development
 
