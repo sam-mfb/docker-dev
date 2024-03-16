@@ -73,17 +73,27 @@ RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
+## install dotnet
+## No arm64 version yet...so we have to install from binaries rather than from the repo
+RUN wget https://dot.net/v1/dotnet-install.sh
+RUN mkdir -p $HOME/dotnet 
+# install latest
+RUN bash ./dotnet-install.sh --install-dir $HOME/dotnet
+# install 7 runtime to run GCM
+RUN bash ./dotnet-install.sh --install-dir $HOME/dotnet --runtime dotnet --version 7.0.13 
+RUN export PATH=$PATH:$HOME/dotnet:$HOME/.dotnet/tools
+RUN export DOTNET_ROOT=$HOME/dotnet
+RUN $HOME/dotnet/dotnet tool install -g git-credential-manager
+RUN DOTNET_ROOT=$HOME/dotnet $HOME/.dotnet/tools/git-credential-manager configure
+RUN git config --global credential.credentialStore cache
+RUN git config --global credential.cacheOptions "--timeout 36000"
+RUN git config --global credential.msauthFlow devicecode
+RUN git config --global credential.azreposCredentialType oauth
 ENTRYPOINT bash
 
 # .NET Core Development Image
 
 FROM base as dotnet-dev
-## No arm64 version yet...so we have to install from binaries rather than from the repo
-RUN wget https://dot.net/v1/dotnet-install.sh
-RUN mkdir -p $HOME/dotnet 
-RUN bash ./dotnet-install.sh --install-dir $HOME/dotnet
-RUN export PATH=$PATH:$HOME/dotnet
-RUN export DOTNET_ROOT=$HOME/dotnet
 # Compile and install sqlite interop and extension (to get arm64 compatability
 # NB: You will have to modify the csproj that uses System.Data.SQLite.Core to remove that
 # ProjectReference and instead add this to the root of the csproj file:
@@ -104,28 +114,6 @@ RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-omni .vimrc
 # pre-install the Omnisharp-Roslyn engine
 RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
-ARG GIT_REPO
-ARG CLONE_DIR
-# mount the ssh-agent port as the current user for purposes of cloning private repos
-RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
-WORKDIR /home/devuser/${CLONE_DIR}
-RUN $HOME/dotnet/dotnet restore
-
-# simplified x64 version where things are simpler...
-FROM base as dotnet-dev-x64
-RUN sudo apt update && sudo apt install -y dotnet6
-WORKDIR /home/devuser
-COPY dotfiles/vimrc-omni-install .vimrc
-RUN vim +'PlugInstall --sync' +qa
-COPY dotfiles/vimrc-omni .vimrc
-# pre-install the Omnisharp-Roslyn engine
-RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
-ARG GIT_REPO
-ARG CLONE_DIR
-# mount the ssh-agent port as the current user for purposes of cloning private repos
-RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
-WORKDIR /home/devuser/${CLONE_DIR}
-RUN dotnet restore
 
 # Coc Development Image
 
@@ -151,28 +139,12 @@ WORKDIR /home/devuser
 # Coc Image preconfigured for Align Typescript development
 
 FROM coc-dev AS ts-dev-align
-ARG GIT_REPO
-ARG CLONE_DIR
-# mount the ssh-agent port as the current user for purposes of cloning private repos
-RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
-RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
-WORKDIR /home/devuser/${CLONE_DIR}
-## RUN rush install
-## # needed to work around a quirk in our repo where rush install generates a non-ignored script file
-## RUN git reset --hard
 # deps for webkit browser
 RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
-VOLUME /home/devuser/$CLONE_DIR
 
 # Coc Image preconfigured for Align PowerShell development
 
 FROM coc-dev AS pwsh-dev-align
-ARG GIT_REPO
-ARG CLONE_DIR
-# mount the ssh-agent port as the current user for purposes of cloning private repos
-RUN --mount=type=ssh,uid=1002 git clone ${GIT_REPO} ${CLONE_DIR}
-WORKDIR /home/devuser/${CLONE_DIR}
-VOLUME /home/devuser/$CLONE_DIR
 
 # Swift build SwiftLint
 

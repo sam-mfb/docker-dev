@@ -24,7 +24,7 @@ source ~/.git-completion.bash
 # export GIT_PS1_SHOWUPSTREAM="auto"
 # export PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
 
-export PATH=$PATH:$HOME/dotnet
+export PATH=$PATH:$HOME/dotnet:$HOME/.dotnet/tools
 export DOTNET_ROOT=$HOME/dotnet
 
 # setup to avoid chrome errors
