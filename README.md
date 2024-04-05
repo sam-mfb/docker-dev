@@ -1,5 +1,17 @@
 # docker-dev
-Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE. Currently has images for TypeScript, Swift (both using coc-nvim) and C#/.NET Core (using omnisharp-vim)
+
+Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE. Currently has images for TypeScript, Swift (both using coc-nvim) and C#/.NET Core (using omnisharp-vim).
+
+The base image has the following installed
+
+1. D2 Docs v0.6.3 for creating diagrams in markdown files
+2. Python v3
+3. Vim
+4. SQLite v3
+5. Azure CLI
+6. Powershell v7
+7. Latest .NET
+8. Git Credential Manager
 
 ## Setup
 
