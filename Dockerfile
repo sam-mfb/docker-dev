@@ -1,5 +1,8 @@
+ARG D2_VERSION=0.6.3
+
 FROM mcr.microsoft.com/playwright:v1.37.1-jammy as base 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG D2_VERSION
 RUN yes | unminimize
 RUN apt-get update
 # cairo, pango, and graphics libraries needed to support node-canvas building
@@ -60,6 +63,10 @@ RUN mkdir /run/user/1002
 RUN sudo chmod 700 /run/user/1002
 RUN sudo chown devuser /run/user/1002
 USER devuser
+# install D2 (https://d2lang.com/)
+RUN curl -fsSL https://d2lang.com/install.sh | sh -s -- --version v${D2_VERSION} 
+ENV PATH /home/devuser/.local/lib/d2/d2-v${D2_VERSION}/bin:$PATH
+RUN d2 --help
 # install powershell modules
 RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
 ## add mfb crt to chromium
@@ -122,8 +129,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash \
-&& . ~/.nvm/nvm.sh \
-&& nvm install lts/hydrogen
+    && . ~/.nvm/nvm.sh \
+    && nvm install lts/hydrogen
 RUN . ~/.nvm/nvm.sh && npm install -g npm@9.8.1
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
@@ -200,8 +207,8 @@ SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash \
-&& . ~/.nvm/nvm.sh \
-&& nvm install lts/hydrogen
+    && . ~/.nvm/nvm.sh \
+    && nvm install lts/hydrogen
 COPY dotfiles/vimrc-swift-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-swift .vimrc
