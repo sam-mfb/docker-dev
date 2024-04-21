@@ -1,8 +1,12 @@
 ARG D2_VERSION=0.6.3
+ARG GCF_VERSION=1.0.0
+ARG GCF_PORT=38272
 
 FROM mcr.microsoft.com/playwright:v1.37.1-jammy as base 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG D2_VERSION
+ARG GCF_VERSION
+ARG GCF_PORT
 RUN yes | unminimize
 RUN apt-get update
 # cairo, pango, and graphics libraries needed to support node-canvas building
@@ -80,22 +84,11 @@ RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
-## install dotnet
-## No arm64 version yet...so we have to install from binaries rather than from the repo
-RUN wget https://dot.net/v1/dotnet-install.sh
-RUN mkdir -p $HOME/dotnet 
-# install latest
-RUN bash ./dotnet-install.sh --install-dir $HOME/dotnet
-# install 7 runtime to run GCM
-RUN bash ./dotnet-install.sh --install-dir $HOME/dotnet --runtime dotnet --version 7.0.13 
-RUN export PATH=$PATH:$HOME/dotnet:$HOME/.dotnet/tools
-RUN export DOTNET_ROOT=$HOME/dotnet
-RUN $HOME/dotnet/dotnet tool install -g git-credential-manager
-RUN DOTNET_ROOT=$HOME/dotnet $HOME/.dotnet/tools/git-credential-manager configure
-RUN git config --global credential.credentialStore cache
-RUN git config --global credential.cacheOptions "--timeout 36000"
-RUN git config --global credential.msauthFlow devicecode
-RUN git config --global credential.azreposCredentialType oauth
+RUN curl -LO https://github.com/sam-mfb/git-credential-forwarder/releases/download/v${GCF_VERSION}/git-credential-forwarder.zip
+RUN unzip git-credential-forwarder.zip
+RUN git config --global credential.helper '!f(){ node ~/gcf-client.js $*; }; f'
+RUN git config --global credential.https://dev.azure.com.useHttpPath true
+ENV GIT_CREDENTIAL_FORWARDER_SERVER host.docker.internal:${GCF_PORT}
 ENTRYPOINT bash
 
 # .NET Core Development Image
