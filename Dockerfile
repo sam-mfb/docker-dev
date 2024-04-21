@@ -1,5 +1,5 @@
 ARG D2_VERSION=0.6.3
-ARG GCF_VERSION=1.0.0
+ARG GCF_VERSION=1.0.1
 ARG GCF_PORT=38272
 
 FROM mcr.microsoft.com/playwright:v1.37.1-jammy as base 
