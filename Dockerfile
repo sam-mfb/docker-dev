@@ -86,8 +86,9 @@ COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
 RUN curl -LO https://github.com/sam-mfb/git-credential-forwarder/releases/download/v${GCF_VERSION}/git-credential-forwarder.zip
 RUN unzip git-credential-forwarder.zip
-RUN git config --global credential.helper '!f(){ node ~/gcf-client.js $*; }; f'
-RUN git config --global credential.https://dev.azure.com.useHttpPath true
+COPY setup-gcf-client.sh ./setup-gcf-client.sh
+RUN sudo chmod 755 ./setup-gcf-client.sh
+RUN ./setup-gcf-client.sh
 ENV GIT_CREDENTIAL_FORWARDER_SERVER host.docker.internal:${GCF_PORT}
 ENTRYPOINT bash
 

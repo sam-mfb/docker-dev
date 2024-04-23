@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 run_func () {
 # flags to easily delete image and container

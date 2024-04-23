@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 IMAGE_TARGET="coc-dev"
 IMAGE_TAG="coc-dev"

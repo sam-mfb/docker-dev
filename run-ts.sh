@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 IMAGE_TARGET="ts-dev-align"
 IMAGE_TAG="align-ts-dev"

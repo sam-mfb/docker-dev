@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 IMAGE_TARGET="pwsh-dev-align"
 IMAGE_TAG="align-pwsh-dev"

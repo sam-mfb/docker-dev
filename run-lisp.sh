@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 IMAGE_TARGET="lisp-dev"
 IMAGE_TAG="lisp-dev"

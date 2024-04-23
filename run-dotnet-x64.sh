@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 IMAGE_TARGET="dotnet-dev-x64"
 IMAGE_TAG="align-services-dev-x64"
