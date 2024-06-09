@@ -1,12 +1,14 @@
 ARG D2_VERSION=0.6.3
 ARG GCF_VERSION=1.1.0
 ARG GCF_PORT=38272
+ARG PWSH_VERSION=7.4.2
 
 FROM mcr.microsoft.com/playwright:v1.37.1-jammy as base 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG D2_VERSION
 ARG GCF_VERSION
 ARG GCF_PORT
+ARG PWSH_VERSION
 RUN yes | unminimize
 RUN apt-get update
 # cairo, pango, and graphics libraries needed to support node-canvas building
@@ -44,7 +46,7 @@ RUN pip install azure-cli
 # install powershell
 RUN mkdir -p /opt/microsoft/powershell/7
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
-    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/powershell-7.4.1-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
+    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
 RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN chmod +x /opt/microsoft/powershell/7/pwsh
 RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
