@@ -19,3 +19,5 @@ call plug#begin('~/.vim/plugged')
   Plug 'yuezk/vim-js'
   Plug 'maxmellon/vim-jsx-pretty' 
 call plug#end()
+
+let g:coc_disable_startup_warning = 1

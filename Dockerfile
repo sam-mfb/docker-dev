@@ -1,9 +1,11 @@
 ARG D2_VERSION=0.6.3
+ARG NPM_VERSION=10.8.2
+ARG NVM_VERSION=0.40.0
 ARG GCF_VERSION=1.1.0
 ARG GCF_PORT=38272
-ARG PWSH_VERSION=7.4.2
+ARG PWSH_VERSION=7.4.4
 
-FROM mcr.microsoft.com/playwright:v1.37.1-jammy as base 
+FROM mcr.microsoft.com/playwright:v1.37.1-jammy AS base 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG D2_VERSION
 ARG GCF_VERSION
@@ -96,7 +98,7 @@ ENTRYPOINT bash
 
 # .NET Core Development Image
 
-FROM base as dotnet-dev
+FROM base AS dotnet-dev
 # Compile and install sqlite interop and extension (to get arm64 compatability
 # NB: You will have to modify the csproj that uses System.Data.SQLite.Core to remove that
 # ProjectReference and instead add this to the root of the csproj file:
@@ -122,12 +124,14 @@ RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnishar
 
 FROM base AS coc-dev
 SHELL ["/bin/bash", "--login", "-c"]
+ARG NVM_VERSION
+ARG NPM_VERSION
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash \
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash \
     && . ~/.nvm/nvm.sh \
     && nvm install lts/hydrogen
-RUN . ~/.nvm/nvm.sh && npm install -g npm@9.8.1
+RUN . ~/.nvm/nvm.sh && npm install -g npm@${NPM_VERSION}
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
@@ -217,7 +221,7 @@ COPY dotfiles/swiftlint.yml .swiftlint.yml
 
 ## LISP development
 
-FROM debian:bullseye-slim as lisp-dev
+FROM debian:bullseye-slim AS lisp-dev
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales sbcl
