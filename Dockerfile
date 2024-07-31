@@ -38,9 +38,9 @@ RUN apt update && apt install packer
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 # install azure cli
 RUN apt-get update
 RUN apt-get -y install pip
@@ -73,7 +73,7 @@ RUN sudo chown devuser /run/user/1002
 USER devuser
 # install D2 (https://d2lang.com/)
 RUN curl -fsSL https://d2lang.com/install.sh | sh -s -- --version v${D2_VERSION} 
-ENV PATH /home/devuser/.local/lib/d2/d2-v${D2_VERSION}/bin:$PATH
+ENV PATH=/home/devuser/.local/lib/d2/d2-v${D2_VERSION}/bin:$PATH
 RUN d2 --help
 # install powershell modules
 RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
@@ -93,8 +93,8 @@ RUN unzip git-credential-forwarder.zip
 COPY setup-gcf-client.sh ./setup-gcf-client.sh
 RUN sudo chmod 755 ./setup-gcf-client.sh
 RUN ./setup-gcf-client.sh
-ENV GIT_CREDENTIAL_FORWARDER_SERVER host.docker.internal:${GCF_PORT}
-ENTRYPOINT bash
+ENV GIT_CREDENTIAL_FORWARDER_SERVER=host.docker.internal:${GCF_PORT}
+ENTRYPOINT ["bash"]
 
 # .NET Core Development Image
 
@@ -133,6 +133,11 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/instal
     && nvm install lts/hydrogen
 RUN . ~/.nvm/nvm.sh && npm install -g npm@${NPM_VERSION}
 COPY dotfiles/vimrc-coc-install .vimrc
+#install vim 9
+RUN sudo apt-get -y install software-properties-common
+RUN sudo add-apt-repository ppa:jonathonf/vim
+RUN sudo apt update
+RUN sudo apt-get -y install vim
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
 RUN mkdir -pv /home/devuser/.config/coc
@@ -182,9 +187,9 @@ RUN apt-get -y install tmux fzf ripgrep curl ssh sqlite3 sudo locales
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 WORKDIR /home/devuser
@@ -202,7 +207,7 @@ RUN mkdir -p -m 0700 ~/.ssh
 # Add public keys for well known repos
 RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
-ENTRYPOINT bash
+ENTRYPOINT ["bash"]
 SHELL ["/bin/bash", "--login", "-c"]
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
@@ -228,9 +233,9 @@ RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sud
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 #setup dev user
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -255,4 +260,4 @@ COPY dotfiles/sshconfig .ssh/config
 # Install slimv
 RUN git clone https://github.com/kovisoft/slimv.git ~/.vim/pack/plugins/start/slimv
 RUN vim +'helptags ~/.vim/pack/plugins/start/slimv/doc' +q
-ENTRYPOINT bash
+ENTRYPOINT ["bash"]
