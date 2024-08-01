@@ -9,7 +9,7 @@ ARG PWSH_VERSION=7.4.4
 ARG DOCKER_COMPOSE_VERSION=2.29.1
 ARG DOCKER_SWITCH_VERSION=1.0.5
 
-FROM mcr.microsoft.com/playwright:v1.37.1-jammy AS base 
+FROM mcr.microsoft.com/playwright:v1.45.3-noble AS base 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG D2_VERSION
 ARG GCF_VERSION
@@ -20,7 +20,7 @@ ARG DOCKER_SWITCH_VERSION
 RUN yes | unminimize
 RUN apt-get update
 # cairo, pango, and graphics libraries needed to support node-canvas building
-RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev  
+RUN apt-get -y install vim-nox tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev  
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -48,9 +48,7 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 # install azure cli
-RUN apt-get update
-RUN apt-get -y install pip
-RUN pip install azure-cli
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 # install powershell
 RUN mkdir -p /opt/microsoft/powershell/7
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
@@ -140,11 +138,6 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/instal
     && nvm install lts/${NODE_LTS_NAME}
 RUN . ~/.nvm/nvm.sh && npm install -g npm@${NPM_VERSION}
 COPY dotfiles/vimrc-coc-install .vimrc
-#install vim 9
-RUN sudo apt-get -y install software-properties-common
-RUN sudo add-apt-repository ppa:jonathonf/vim
-RUN sudo apt update
-RUN sudo apt-get -y install vim
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
 RUN mkdir -pv /home/devuser/.config/coc
