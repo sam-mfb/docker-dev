@@ -1,9 +1,13 @@
 ARG D2_VERSION=0.6.3
+ARG DOCUMER_COMPOSE_VERSION=2.29
 ARG NPM_VERSION=10.8.2
 ARG NVM_VERSION=0.40.0
+ARG NODE_LTS_NAME=hydrogen
 ARG GCF_VERSION=1.1.0
 ARG GCF_PORT=38272
 ARG PWSH_VERSION=7.4.4
+ARG DOCKER_COMPOSE_VERSION=2.29.1
+ARG DOCKER_SWITCH_VERSION=1.0.5
 
 FROM mcr.microsoft.com/playwright:v1.37.1-jammy AS base 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -11,6 +15,8 @@ ARG D2_VERSION
 ARG GCF_VERSION
 ARG GCF_PORT
 ARG PWSH_VERSION
+ARG DOCKER_COMPOSE_VERSION
+ARG DOCKER_SWITCH_VERSION
 RUN yes | unminimize
 RUN apt-get update
 # cairo, pango, and graphics libraries needed to support node-canvas building
@@ -26,9 +32,9 @@ RUN docker buildx install
 RUN touch /var/run/docker.sock
 RUN chgrp sudo /var/run/docker.sock
 # Install docker compose v2
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
 RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
-RUN curl -fL https://github.com/docker/compose-switch/releases/download/v1.0.5/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
+RUN curl -fL https://github.com/docker/compose-switch/releases/download/v${DOCKER_SWITCH_VERSION}/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
 RUN chmod +x /usr/local/bin/compose-switch
 RUN update-alternatives --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99
 # install packer for image building
@@ -126,11 +132,12 @@ FROM base AS coc-dev
 SHELL ["/bin/bash", "--login", "-c"]
 ARG NVM_VERSION
 ARG NPM_VERSION
+ARG NODE_LTS_NAME
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash \
     && . ~/.nvm/nvm.sh \
-    && nvm install lts/hydrogen
+    && nvm install lts/${NODE_LTS_NAME}
 RUN . ~/.nvm/nvm.sh && npm install -g npm@${NPM_VERSION}
 COPY dotfiles/vimrc-coc-install .vimrc
 #install vim 9
