@@ -252,6 +252,11 @@
       "args": null
     },
     {
+      "name": "fchmodat2",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "fchown",
       "action": "SCMP_ACT_ALLOW",
       "args": null
