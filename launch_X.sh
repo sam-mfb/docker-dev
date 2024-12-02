@@ -19,7 +19,8 @@ open -a XQuartz
 sleep 2
 echo "Configuring xhost for localhost"
 xterm -e "xhost +localhost"
-sleep 2
 echo "Killing any xterm sessions..."
 pkill -x xterm
+echo "Returning focus to the terminal..."
+osascript -e 'tell application "Terminal" to activate'
 echo "Done"
