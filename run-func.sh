@@ -32,6 +32,8 @@ if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
     docker build --pull --build-arg GIT_REPO=${GIT_REPO} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
 fi
 
+./launch_X.sh
+
 # run container if not created, otherwise attach to existing
 if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" == "" ]]; then
     echo "Creating and running container..."
