@@ -240,3 +240,18 @@ highlight link CocNotificationProgress Directory
 highlight link CocPumVirtualText Directory
 highlight link CocFloatDividingLine Directory
 
+" use xclip to forward clipboard out to host via X11 (requires working X11
+" setup)
+set clipboard=unnamedplus
+let g:clipboard = {
+    \ 'name': 'xclip',
+    \ 'copy': {
+        \ '+': 'xclip -selection clipboard',
+        \ '*': 'xclip -selection clipboard',
+    \ },
+    \ 'paste': {
+        \ '+': 'xclip -selection clipboard -o',
+        \ '*': 'xclip -selection clipboard -o',
+    \ },
+    \ 'cache_enabled': 1,
+\ }
