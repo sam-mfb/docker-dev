@@ -21,12 +21,6 @@ The base image has the following installed
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
 - Use the existing `run-[x]` scripts or create your own `run-[x].sh` script based on them
 - On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
-- To use the git and oauth2 forwarders, on your host you'll need to start them and, ideally, setup the corresponding env variables automatically. For example, on a mac in .zprofile
-
-```sh
-export GIT_CREDENTIAL_FORWARDER_PORT=38272
-export OAUTH2_FORWARDER_PORT=48272
-```
 
 ## run-[x].sh scripts
 
@@ -115,6 +109,15 @@ Using the chrome.js seccomp profile, with the following modifications:
 - Set shm size to 2gb via docker run. Alternatively, call with `--disable-dev-shm-usage` to avoid crashes from too small shm size
 
 ### Git and Oauth2 forwarders
+
+To use the git and oauth2 forwarders, on your host you'll need to start them and, ideally, setup the corresponding env variables automatically. For example, on a mac in .zprofile
+
+```sh
+export GIT_CREDENTIAL_FORWARDER_PORT=38272
+export OAUTH2_FORWARDER_PORT=48272
+```
+
+They can both be started in a single tmux session by running `./fwd_servers.sh`
 
 VS Code can clobber the setup needed for these to work. To re-enable, in the container run:
 
