@@ -5,6 +5,8 @@ ARG NVM_VERSION=0.40.0
 ARG NODE_LTS_NAME=iron
 ARG GCF_VERSION=1.1.1
 ARG GCF_PORT=38272
+ARG O2F_VERSION=1.0.0
+ARG O2F_PORT=48272
 ARG PWSH_VERSION=7.4.4
 ARG DOCKER_COMPOSE_VERSION=2.29.1
 ARG DOCKER_SWITCH_VERSION=1.0.5
@@ -14,6 +16,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG D2_VERSION
 ARG GCF_VERSION
 ARG GCF_PORT
+ARG O2F_VERSION
+ARG O2F_PORT
 ARG PWSH_VERSION
 ARG DOCKER_COMPOSE_VERSION
 ARG DOCKER_SWITCH_VERSION
@@ -92,12 +96,20 @@ RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
+## install git credential forwarder
 RUN curl -LO https://github.com/sam-mfb/git-credential-forwarder/releases/download/v${GCF_VERSION}/git-credential-forwarder.zip
 RUN unzip git-credential-forwarder.zip
 COPY setup-gcf-client.sh ./setup-gcf-client.sh
 RUN sudo chmod 755 ./setup-gcf-client.sh
 RUN ./setup-gcf-client.sh
 ENV GIT_CREDENTIAL_FORWARDER_SERVER=host.docker.internal:${GCF_PORT}
+## install oauth2 forwarder
+RUN curl -LO https://github.com/sam-mfb/oauth2-forwarder/releases/download/v${O2F_VERSION}/oauth2-forwarder.zip
+RUN unzip oauth2-forwarder.zip
+## use this file via `source ~/.browser_env` if VS code clobbers BROWSER
+COPY dotfiles/browser_env ./.browser_env
+ENV OAUTH2_FORWARDER_SERVER=host.docker.internal:${O2F_PORT}
+ENV BROWSER=/home/devuser/o2f/browser.sh
 ENTRYPOINT ["bash"]
 
 # .NET Core Development Image
