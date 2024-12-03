@@ -110,6 +110,8 @@ RUN unzip oauth2-forwarder.zip
 COPY dotfiles/browser_env ./.browser_env
 ENV OAUTH2_FORWARDER_SERVER=host.docker.internal:${O2F_PORT}
 ENV BROWSER=/home/devuser/o2f/browser.sh
+COPY tmux_dev.sh ./tmux_dev.sh
+RUN sudo chmod 755 ./tmux_dev.sh
 ENTRYPOINT ["bash"]
 
 # .NET Core Development Image
