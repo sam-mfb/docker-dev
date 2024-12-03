@@ -17,10 +17,10 @@ fi
 echo "Launching XQuartz (if not open already)..."
 open -a XQuartz
 sleep 2
-echo "Configuring xhost for localhost"
-xterm -e "xhost +localhost"
 echo "Killing any xterm sessions..."
 pkill -x xterm
+echo "Configuring xhost for localhost"
+xterm -e "xhost +localhost"
 echo "Returning focus to the terminal..."
 osascript -e 'tell application "Terminal" to activate'
 echo "Done"
