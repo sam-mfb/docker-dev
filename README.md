@@ -21,6 +21,12 @@ The base image has the following installed
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
 - Use the existing `run-[x]` scripts or create your own `run-[x].sh` script based on them
 - On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
+- To use the git and oauth2 forwarders, on your host you'll need to start them and, ideally, setup the corresponding env variables automatically. For example, on a mac in .zprofile
+
+```sh
+export GIT_CREDENTIAL_FORWARDER_PORT=38272
+export OAUTH2_FORWARDER_PORT=48272
+```
 
 ## run-[x].sh scripts
 
@@ -69,6 +75,8 @@ Delete both container and image
 
 Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer on the host.
 
+So does using clipboard transferring with `xclip`
+
 ### On Mac --
 
 - Install XQuartz via `brew install --cask xquartz`
@@ -78,12 +86,14 @@ Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer
 - Start XQuartz
 - Run /usr/bin/X11/xhost +localhost
 
+NB: On mac, once you have XQuartz setup properly the run tasks will automatically start it
+
 ### On Windows --
 
 - Install Cygwin/X (cygwin installer and choose xinit and xhost)
 - Change the XWin Server shortcut to add `-- -listen tcp` as a command option
 - Start XWin Server (allow private network access only)
-- In Cygwin terminal run: `DISPLAY=localhost:0.0 xhost +localhost` 
+- In Cygwin terminal run: `DISPLAY=localhost:0.0 xhost +localhost`
 
 ## Seccomp
 
@@ -103,3 +113,12 @@ Using the chrome.js seccomp profile, with the following modifications:
 - Call with `--disable-gpu` to get rid of graphics warnings.
 - Call with `--window-size=1280,1024` or similar to set window size
 - Set shm size to 2gb via docker run. Alternatively, call with `--disable-dev-shm-usage` to avoid crashes from too small shm size
+
+### Git and Oauth2 forwarders
+
+VS Code can clobber the setup needed for these to work. To re-enable, in the container run:
+
+```bash
+~/setup-gcf-client.sh
+source ~/.browser_env
+```
