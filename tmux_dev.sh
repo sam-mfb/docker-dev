@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #Max and min widths
-MAX_WIDTH=80
-MIN_WIDTH=40
+MAX_WIDTH=100
+MIN_WIDTH=80
 
 # Name the tmux session
 SESSION_NAME="dev_env"
