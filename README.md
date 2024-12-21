@@ -71,6 +71,8 @@ Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer
 
 So does using clipboard transferring with `xclip`
 
+And, it is easier to have it running to use gnome-keyring. It is possible to pass gnome-keyring a password from stdin but i'd have to write some util to get the password in a secure fashion. 
+
 ### On Mac --
 
 - Install XQuartz via `brew install --cask xquartz`

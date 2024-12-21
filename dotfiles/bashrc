@@ -27,7 +27,9 @@ source ~/.git-completion.bash
 export PATH=$PATH:$HOME/dotnet:$HOME/.dotnet/tools
 export DOTNET_ROOT=$HOME/dotnet
 
-# setup to avoid chrome errors
+# setup dbus which is used by chrome and libsecret/gnome-keyring
+
+export NO_AT_BRIDGE=1 
 
 # don't start in tmux sessions
 if [[ -z $TMUX && -z $NO_DBUS_CONFIG ]]; then
@@ -35,4 +37,7 @@ if [[ -z $TMUX && -z $NO_DBUS_CONFIG ]]; then
     export XDG_RUNTIME_DIR=/run/user/1002
     export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
     dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS --nofork --nopidfile --syslog-only &
+    echo "Logging gnome-keyring-daemon messages to /tmp/gnome-keyring.log"
+
+    gnome-keyring-daemon --start --components=secrets &> /tmp/gnome-keyring.log
 fi
