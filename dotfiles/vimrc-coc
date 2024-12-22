@@ -51,7 +51,7 @@ colorscheme OceanicNext
 autocmd BufNewFile,BufRead *.tsx,*.jsx set filetype=typescriptreact
 
 " set json filetype to jsonc
-autocmd BufNewFile,BufRead rush.json set filetype=jsonc
+autocmd BufNewFile,BufRead *.json set filetype=jsonc
 
 "enable highlighting when buffer loads to keep in sync
 autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
