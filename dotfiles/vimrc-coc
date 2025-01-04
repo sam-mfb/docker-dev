@@ -1,6 +1,11 @@
 set nocompatible	" Use Vim defaults instead of 100% vi compatibility
 set backspace=indent,eol,start	" more powerful backspacing
 
+" Poll for file changes every 1 seconds
+function! CheckFileChanges(timer)
+    checktime
+endfunction
+
 " Now we set some defaults for the editor
 set history=50		" keep 50 lines of command line history
 set ruler		" show the cursor position all the time
