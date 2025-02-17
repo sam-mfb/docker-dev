@@ -1,10 +1,16 @@
 set nocompatible	" Use Vim defaults instead of 100% vi compatibility
 set backspace=indent,eol,start	" more powerful backspacing
 
-" Poll for file changes every 1 seconds
+" Enable auto-reloading of files changed outside of Vim
+set autoread
+
+" Define a function to check for file changes
 function! CheckFileChanges(timer)
     checktime
 endfunction
+
+" Start a timer that runs every 1000 milliseconds (1 second)
+call timer_start(1000, 'CheckFileChanges', {'repeat': -1})
 
 " Now we set some defaults for the editor
 set history=50		" keep 50 lines of command line history
