@@ -38,5 +38,6 @@
     "unmount",
     "usermatters",
     "uuidv"
-  ]
+  ],
+  "typescript.preferences.preferTypeOnlyAutoImports": true
 }
