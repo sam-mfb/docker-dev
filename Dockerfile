@@ -161,6 +161,8 @@ RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 RUN sudo chown devuser .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
+# Install Claude
+RUN ~/.nvm/nvm.sh && npm install -g @anthropic-ai/claude-code
 WORKDIR /home/devuser
 
 # Coc Image preconfigured for Align Typescript development
