@@ -71,7 +71,7 @@ COPY dotfiles/tmux.conf .tmux.conf
 ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash .git-completion.bash
 ADD https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh .git-prompt.sh
 COPY dotfiles/bashrc .bashrc
-COPY .gitconfig .gitconfig
+COPY dotfiles/gitconfig .gitconfig
 # Package to allow easy tmux/vim navigation
 RUN git clone https://github.com/christoomey/vim-tmux-navigator.git .vim/pack/plugins/start/vim-tmux-navigator
 RUN chown -R devuser /home/devuser
