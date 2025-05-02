@@ -20,6 +20,9 @@ ARG O2F_PORT
 ARG PWSH_VERSION
 ARG DOCKER_COMPOSE_VERSION
 ARG DOCKER_SWITCH_VERSION
+ARG NVM_VERSION
+ARG NPM_VERSION
+ARG NODE_LTS_NAME
 RUN yes | unminimize
 RUN apt-get update
 # cairo, pango, and graphics libraries needed to support node-canvas building
@@ -95,8 +98,18 @@ RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
 RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
+# install nvm with a specified version of node; could use a node base image, but this is
+# more flexible
+SHELL ["/bin/bash", "--login", "-c"]
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash \
+    && . ~/.nvm/nvm.sh \
+    && nvm install lts/${NODE_LTS_NAME}
+RUN . ~/.nvm/nvm.sh && npm install -g npm@${NPM_VERSION}
 ## install git credential forwarder
 RUN npm install -g git-credential-forwarder
+COPY setup-gcf-client.sh ./setup-gcf-client.sh
+RUN sudo chmod 755 ./setup-gcf-client.sh
+RUN ./setup-gcf-client.sh
 ENV GIT_CREDENTIAL_FORWARDER_SERVER=host.docker.internal:${GCF_PORT}
 ## install oauth2 forwarder
 RUN npm install -g oauth2-forwarder
@@ -107,6 +120,32 @@ ENV BROWSER=o2f-browser
 COPY tmux_dev.sh ./tmux_dev.sh
 RUN sudo chmod 755 ./tmux_dev.sh
 ENTRYPOINT ["bash"]
+
+# Coc Development Image
+
+FROM base AS coc-dev
+SHELL ["/bin/bash", "--login", "-c"]
+COPY dotfiles/vimrc-coc-install .vimrc
+RUN vim +'PlugInstall --sync' +qa
+COPY dotfiles/vimrc-coc .vimrc
+RUN mkdir -pv /home/devuser/.config/coc
+RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml coc-snippets coc-powershell' +qa
+RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
+COPY dotfiles/coc-settings.json .vim/coc-settings.json
+RUN sudo chown devuser .vim/coc-settings.json
+COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
+# Install Claude
+RUN ~/.nvm/nvm.sh && npm install -g @anthropic-ai/claude-code
+WORKDIR /home/devuser
+
+# Coc Image preconfigured for Align Typescript development
+
+FROM coc-dev AS ts-dev-align
+# deps for webkit browser
+RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
+RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
+ARG GIT_REPO
+ENV ALIGN_REPO=${GIT_REPO}
 
 # .NET Core Development Image
 
@@ -132,40 +171,6 @@ COPY dotfiles/vimrc-omni .vimrc
 # pre-install the Omnisharp-Roslyn engine
 RUN .vim/plugged/omnisharp-vim/installer/omnisharp-manager.sh -l .cache/omnisharp-vim/omnisharp-roslyn
 
-# Coc Development Image
-
-FROM base AS coc-dev
-SHELL ["/bin/bash", "--login", "-c"]
-ARG NVM_VERSION
-ARG NPM_VERSION
-ARG NODE_LTS_NAME
-# install nvm with a specified version of node; could use a node base image, but this is
-# more flexible
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash \
-    && . ~/.nvm/nvm.sh \
-    && nvm install lts/${NODE_LTS_NAME}
-RUN . ~/.nvm/nvm.sh && npm install -g npm@${NPM_VERSION}
-COPY dotfiles/vimrc-coc-install .vimrc
-RUN vim +'PlugInstall --sync' +qa
-COPY dotfiles/vimrc-coc .vimrc
-RUN mkdir -pv /home/devuser/.config/coc
-RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml coc-snippets coc-powershell' +qa
-RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
-COPY dotfiles/coc-settings.json .vim/coc-settings.json
-RUN sudo chown devuser .vim/coc-settings.json
-COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
-# Install Claude
-RUN ~/.nvm/nvm.sh && npm install -g @anthropic-ai/claude-code
-WORKDIR /home/devuser
-
-# Coc Image preconfigured for Align Typescript development
-
-FROM coc-dev AS ts-dev-align
-# deps for webkit browser
-RUN sudo apt-get update && sudo apt-get install -y gstreamer1.0-gl gstreamer1.0-plugins-ugly
-RUN . ~/.nvm/nvm.sh && npm install -g @microsoft/rush
-ARG GIT_REPO
-ENV ALIGN_REPO=${GIT_REPO}
 
 # Coc Image preconfigured for Align PowerShell development
 
