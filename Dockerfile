@@ -4,7 +4,6 @@ ARG D2_VERSION=0.6.9
 ARG NPM_VERSION=10.8.2
 ARG NVM_VERSION=0.40.1
 ARG NODE_LTS_NAME=iron
-ARG GCF_VERSION=1.1.1
 ARG GCF_PORT=38274
 ARG O2F_VERSION=1.0.1
 ARG O2F_PORT=48272
@@ -98,11 +97,7 @@ RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 COPY dotfiles/sshconfig .ssh/config
 RUN az extension add --name azure-devops
 ## install git credential forwarder
-RUN curl -LO https://github.com/sam-mfb/git-credential-forwarder/releases/download/v${GCF_VERSION}/git-credential-forwarder.zip
-RUN unzip git-credential-forwarder.zip
-COPY setup-gcf-client.sh ./setup-gcf-client.sh
-RUN sudo chmod 755 ./setup-gcf-client.sh
-RUN ./setup-gcf-client.sh
+RUN npm install -g git-credential-forwarder
 ENV GIT_CREDENTIAL_FORWARDER_SERVER=host.docker.internal:${GCF_PORT}
 ## install oauth2 forwarder
 RUN curl -LO https://github.com/sam-mfb/oauth2-forwarder/releases/download/v${O2F_VERSION}/oauth2-forwarder.zip

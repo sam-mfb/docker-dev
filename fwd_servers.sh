@@ -7,7 +7,7 @@ export OAUTH2_FORWARDER_PORT="48272"
 SESSION_NAME="node_fwd_servers"
 
 # Server commands
-SERVER1_COMMAND="node ~/gcf-server.js"
+SERVER1_COMMAND="gcf-server"
 SERVER2_COMMAND="node ~/o2f/o2f-server.js"
 
 # Start a new tmux session
