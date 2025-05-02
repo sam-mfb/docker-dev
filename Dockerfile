@@ -5,7 +5,6 @@ ARG NPM_VERSION=10.8.2
 ARG NVM_VERSION=0.40.1
 ARG NODE_LTS_NAME=iron
 ARG GCF_PORT=38274
-ARG O2F_VERSION=1.0.1
 ARG O2F_PORT=48272
 ARG PWSH_VERSION=7.5.0
 ARG DOCKER_COMPOSE_VERSION=2.33.0
@@ -100,12 +99,11 @@ RUN az extension add --name azure-devops
 RUN npm install -g git-credential-forwarder
 ENV GIT_CREDENTIAL_FORWARDER_SERVER=host.docker.internal:${GCF_PORT}
 ## install oauth2 forwarder
-RUN curl -LO https://github.com/sam-mfb/oauth2-forwarder/releases/download/v${O2F_VERSION}/oauth2-forwarder.zip
-RUN unzip oauth2-forwarder.zip
+RUN npm install -g oauth2-forwarder
 ## use this file via `source ~/.browser_env` if VS code clobbers BROWSER
 COPY dotfiles/browser_env ./.browser_env
 ENV OAUTH2_FORWARDER_SERVER=host.docker.internal:${O2F_PORT}
-ENV BROWSER=/home/devuser/o2f/browser.sh
+ENV BROWSER=o2f-browser
 COPY tmux_dev.sh ./tmux_dev.sh
 RUN sudo chmod 755 ./tmux_dev.sh
 ENTRYPOINT ["bash"]

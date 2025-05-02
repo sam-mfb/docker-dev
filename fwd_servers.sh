@@ -8,7 +8,7 @@ SESSION_NAME="node_fwd_servers"
 
 # Server commands
 SERVER1_COMMAND="gcf-server"
-SERVER2_COMMAND="node ~/o2f/o2f-server.js"
+SERVER2_COMMAND="o2f-server"
 
 # Start a new tmux session
 tmux new-session -d -s "$SESSION_NAME"

@@ -1,1 +1,1 @@
-export BROWSER=~/o2f/browser.sh
+export BROWSER=o2f-browser
