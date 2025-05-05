@@ -112,6 +112,13 @@ COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 
 # install Claude
 RUN npm install -g @anthropic-ai/claude-code
+ARG ANTHROPIC_API_KEY
+ENV ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+COPY dotfiles/claude.json .claude.json
+RUN sudo chown devuser .claude.json
+COPY add_anthropic_key.sh add_anthropic_key.sh
+RUN sudo chmod +x add_anthropic_key.sh
+RUN ./add_anthropic_key.sh
 
 RUN npm install -g @microsoft/rush
 ARG GIT_REPO
