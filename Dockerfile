@@ -110,7 +110,7 @@ COPY dotfiles/coc-settings.json .vim/coc-settings.json
 RUN sudo chown devuser .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 
-# Install Claude
+# install Claude
 RUN npm install -g @anthropic-ai/claude-code
 
 RUN npm install -g @microsoft/rush

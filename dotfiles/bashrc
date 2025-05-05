@@ -12,20 +12,11 @@ alias lsg='ls "$(git rev-parse --show-cdup)"'
 # if you are not a vim user you may want to comment this out
 set -o vi
 
+# give user control over docker.sock
+sudo chown devuser /var/run/docker.sock
+
 # git tab completion
 source ~/.git-completion.bash
-
-## uncomment if you want to get git status in the prompt
-## NB: it is slow
-# git prompt
-# source ~/.git-prompt.sh
-# export GIT_PS1_SHOWDIRTYSTATE="true"
-# export GIT_PS1_SHOWUNTRACKEDFILES="true"
-# export GIT_PS1_SHOWUPSTREAM="auto"
-# export PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
-
-export PATH=$PATH:$HOME/dotnet:$HOME/.dotnet/tools
-export DOTNET_ROOT=$HOME/dotnet
 
 # setup dbus which is used by chrome and libsecret/gnome-keyring
 
