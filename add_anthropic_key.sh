@@ -3,7 +3,7 @@
 # Check if ANTHROPIC_API_KEY is set
 if [ -z "$ANTHROPIC_API_KEY" ]; then
   echo "Error: ANTHROPIC_API_KEY environment variable is not set"
-  exit 1
+  exit 0
 fi
 
 # Check if ~/.claude.json exists
