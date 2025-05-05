@@ -1,8 +1,0 @@
-To use a manually compiled SQLite file, you will have to modify the csproj that uses System.Data.SQLite.Core 
-to remove that ProjectReference and instead add this to the root of the csproj file:
-
-<ItemGroup>
-  <Reference Include="..\..\sqlite-source\bin\NetStandard21\ReleaseNetStandard21\bin\netstandard2.1\System.Data.SQLite.dll" />
-</ItemGroup>
-
-This ensure that the extension lib called by dotnet matches the interop lib compiled here

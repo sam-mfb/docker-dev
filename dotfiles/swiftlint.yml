@@ -1,8 +1,0 @@
-included:
-  - Source
-  - Tests
-excluded:
-  - Tests/SwiftLintFrameworkTests/Resources
-analyzer_rules:
-  - unused_declaration
-  - unused_import

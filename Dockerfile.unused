@@ -1,0 +1,25 @@
+# install packer for image building
+RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+RUN apt update && apt install packer
+
+# install azure cli
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+RUN az extension add --name azure-devops
+
+# install powershell
+RUN mkdir -p /opt/microsoft/powershell/7
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
+    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
+RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
+RUN chmod +x /opt/microsoft/powershell/7/pwsh
+RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
+# install powershell modules
+RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
+
+# install D2 (https://d2lang.com/)
+RUN curl -fsSL https://d2lang.com/install.sh | sh -s -- --version v${D2_VERSION} 
+ENV PATH=/home/devuser/.local/lib/d2/d2-v${D2_VERSION}/bin:$PATH
+RUN d2 --help
+
