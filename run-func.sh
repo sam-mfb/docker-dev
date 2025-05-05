@@ -21,7 +21,7 @@ while getopts ":krxb" option; do
         b)
             if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
                 echo "Building image (no-cache)..."
-                docker build --no-cache --pull --build-arg GIT_REPO=${GIT_REPO} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
+                docker build --no-cache --pull --build-arg GIT_REPO=${GIT_REPO} --build-arg ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
             fi
     esac
 done
@@ -29,7 +29,7 @@ done
 # build image if not built already
 if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
     echo "Building image..."
-    docker build --pull --build-arg GIT_REPO=${GIT_REPO} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
+    docker build --pull --build-arg GIT_REPO=${GIT_REPO} --build-arg ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
 fi
 
 ./launch_X.sh
