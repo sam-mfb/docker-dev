@@ -152,6 +152,10 @@ command! -nargs=0 Prettier :CocCommand prettier.formatFile
 vmap <leader>f <Plug>(coc-format-selected)
 nmap <leader>f <Plug>(coc-format-selected)
 
+
+" Run :Prettier automatically before saving files with specific extensions
+autocmd BufWritePre *.js,*.ts,*.jsx,*.tsx,*.json,*.css,*.scss,*.html,*.md Prettier
+
 " Better display for messages
 set cmdheight=2
 
