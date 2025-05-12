@@ -7,7 +7,7 @@ ARG NVM_VERSION=0.40.1
 ARG NODE_LTS_NAME=iron
 ARG GCF_PORT=38274
 ARG O2F_PORT=48272
-ARG PWSH_VERSION=7.5.0
+ARG PWSH_VERSION=7.5.1
 ARG DOCKER_COMPOSE_VERSION=2.33.0
 ARG DOCKER_SWITCH_VERSION=1.0.5
 
@@ -109,6 +109,15 @@ RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 RUN sudo chown devuser .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
+
+# install powershell
+RUN mkdir -p /opt/microsoft/powershell/7
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
+    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
+RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
+RUN chmod +x /opt/microsoft/powershell/7/pwsh
+RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
 
 # install Claude
 RUN npm install -g @anthropic-ai/claude-code

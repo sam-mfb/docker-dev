@@ -7,14 +7,6 @@ RUN apt update && apt install packer
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 RUN az extension add --name azure-devops
 
-# install powershell
-RUN mkdir -p /opt/microsoft/powershell/7
-RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
-    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
-RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
-RUN chmod +x /opt/microsoft/powershell/7/pwsh
-RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
-COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
 # install powershell modules
 RUN pwsh /opt/microsoft/powershell/InstallPSMods.ps1
 
