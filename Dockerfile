@@ -112,8 +112,8 @@ COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 
 # install powershell
 RUN sudo mkdir -p /opt/microsoft/powershell/7
-RUN sudo arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
-    curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
+    sudo curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
 RUN sudo tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN sudo chmod +x /opt/microsoft/powershell/7/pwsh
 RUN sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
