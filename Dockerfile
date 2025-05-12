@@ -117,7 +117,7 @@ RUN sudo arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
 RUN sudo tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
 RUN sudo chmod +x /opt/microsoft/powershell/7/pwsh
 RUN sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
-COPY sudo InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
+COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
 
 # install Claude
 RUN npm install -g @anthropic-ai/claude-code
