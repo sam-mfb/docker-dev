@@ -111,13 +111,13 @@ RUN sudo chown devuser .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 
 # install powershell
-RUN mkdir -p /opt/microsoft/powershell/7
-RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
+RUN sudo mkdir -p /opt/microsoft/powershell/7
+RUN sudo arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
     curl -sSL "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${arch}.tar.gz" -o /opt/microsoft/powershell.tar.gz
-RUN tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
-RUN chmod +x /opt/microsoft/powershell/7/pwsh
-RUN ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
-COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
+RUN sudo tar zxf /opt/microsoft/powershell.tar.gz -C /opt/microsoft/powershell/7
+RUN sudo chmod +x /opt/microsoft/powershell/7/pwsh
+RUN sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+COPY sudo InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
 
 # install Claude
 RUN npm install -g @anthropic-ai/claude-code
