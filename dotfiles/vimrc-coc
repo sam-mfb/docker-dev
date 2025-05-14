@@ -56,6 +56,19 @@ set number
 set background=dark
 
 colorscheme OceanicNext
+" Fix autocomplete menu colors for better visibility
+hi Pmenu ctermfg=252 ctermbg=237 guifg=#C0C5CE guibg=#3D4752
+hi PmenuSel ctermfg=255 ctermbg=239 guifg=#FFFFFF guibg=#4F5B66
+hi PmenuSbar ctermbg=237 guibg=#3B4252
+hi PmenuThumb ctermbg=249 guibg=#B2B2B2
+
+" Make sure Coc items properly inherit from Pmenu items
+highlight link CocMenuSel PmenuSel
+highlight link CocMenu Pmenu
+highlight link CocPumMenu Pmenu
+highlight link CocPumVirtualText Comment
+highlight link CocPumShortcut Special
+highlight link CocPumSearch Identifier
 "let g:airline_theme='oceanicnext'
 
 " set filetypes as typescriptreact
@@ -242,13 +255,10 @@ nnoremap <expr> <c-d> popup_scroll#scroll_cursor_popup(1) ? '<esc>' : '<c-d>'
 nnoremap <expr> <c-u> popup_scroll#scroll_cursor_popup(0) ? '<esc>' : '<c-u>'
 set belloff+=esc
 
-" fix autocomplete highlighting to be more legible
-highlight link CocMenuSel PmenuSel
-highlight link CocPumSearch Directory
+" fix autocomplete highlighting for other elements
 highlight link CocSearch Directory
 highlight link CocMarkdownLink Directory
 highlight link CocNotificationProgress Directory
-highlight link CocPumVirtualText Directory
 highlight link CocFloatDividingLine Directory
 
 " use xclip to forward clipboard out to host via X11 (requires working X11
