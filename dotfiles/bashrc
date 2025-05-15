@@ -1,15 +1,15 @@
 source /etc/skel/.bashrc
 
 # Define our custom colors (for better readability)
-COLOR_HOST=228    # Pastel yellow
-COLOR_PATH=141    # Light teal
-COLOR_EXEC=10     # green color
+COLOR_HOST=226    # yellow
+COLOR_PATH=135    # teal
+COLOR_EXEC=10     # green 
 
 # Override the PS1 prompt with our custom colors
 PS1='${debian_chroot:+($debian_chroot)}\[\033[38;5;${COLOR_HOST}m\]\u@\h\[\033[00m\]:\[\033[38;5;${COLOR_PATH}m\]\w\[\033[00m\]\$ '
 
 # Set custom colors for ls output
-LS_COLORS="$(echo $LS_COLORS | sed 's/di=01;34/di=38;5;${COLOR_PATH}/' | sed 's/ex=01;34/ex=38;5;${COLOR_EXEC}/')"
+LS_COLORS="$(echo $LS_COLORS | sed "s/di=01;34/di=38;5;$COLOR_PATH/" | sed "s/ex=01;34/ex=38;5;$COLOR_EXEC/")"
 export LS_COLORS
 
 ## commands relative to root of current git repository
