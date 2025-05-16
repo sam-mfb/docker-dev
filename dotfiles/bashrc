@@ -1,7 +1,7 @@
 source /etc/skel/.bashrc
 
 # Define our custom colors (for better readability)
-COLOR_HOST=226    # yellow
+COLOR_HOST=220    # yellow
 COLOR_PATH=135    # teal
 COLOR_EXEC=10     # green 
 
