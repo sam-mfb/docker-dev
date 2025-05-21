@@ -4,6 +4,5 @@
   "tipsHistory": {
     "new-user-warmup": 1
   },
-  "primaryApiKey": "[ANTHROPIC_API_KEY]",
   "hasCompletedOnboarding": true
 }
