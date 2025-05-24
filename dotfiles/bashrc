@@ -17,6 +17,20 @@ export LS_COLORS
 # navigate to root of repository
 alias cdg='cd "$(git rev-parse --show-cdup)"'
 
+# navigate to the root of an npm package
+cdp() {
+    local dir="$PWD"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/package.json" ]]; then
+            cd "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    echo "No package.json found in current path"
+    return 1
+}
+
 # list files at root of repository
 alias lsg='ls "$(git rev-parse --show-cdup)"'
 
