@@ -3,7 +3,10 @@
 run_func () {
 # flags to easily delete image and container
 local OPTIND o a
-while getopts ":krxb" option; do
+local MOUNT_HOME=""
+local BUILD_FLAGS="--pull"
+local FORCE_BUILD=false
+while getopts ":krxbh" option; do
     case $option in
         k)
             echo "Deleting container..."
@@ -19,17 +22,24 @@ while getopts ":krxb" option; do
             docker rmi ${IMAGE_TAG}
             exit;;
         b)
-            if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
-                echo "Building image (no-cache)..."
-                docker build --no-cache --pull --build-arg GIT_REPO=${GIT_REPO} --build-arg ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
-            fi
+            BUILD_FLAGS="--no-cache --pull"
+            FORCE_BUILD=true
+            ;;
+        h)
+            MOUNT_HOME="--mount type=bind,src=${HOME},target=/host-home"
+            echo "Will mount host home directory to /host-home"
+            ;;
     esac
 done
 
-# build image if not built already
-if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]]; then
-    echo "Building image..."
-    docker build --pull --build-arg GIT_REPO=${GIT_REPO} --build-arg ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
+# build image if not built already or if -b flag was used
+if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]] || [[ "$FORCE_BUILD" == true ]]; then
+    if [[ "$FORCE_BUILD" == true ]]; then
+        echo "Building image (no-cache)..."
+    else
+        echo "Building image..."
+    fi
+    docker build ${BUILD_FLAGS} --build-arg GIT_REPO=${GIT_REPO} --build-arg ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
 fi
 
 ./launch_X.sh
@@ -44,7 +54,7 @@ if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" 
     #  - set detach key to ctrl z,z to free up ctrl,p (the default)
     #  - set DISPLAY env so we can use XServer over the network
     #  - use a custome seccomp profile that enables chrome sandbox
-    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=custom-seccomp.json -h ${HOSTNAME} -it ${IMAGE_TAG}
+    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock ${MOUNT_HOME} --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=custom-seccomp.json -h ${HOSTNAME} -it ${IMAGE_TAG}
 else
     echo "Starting and attaching to existing container..."
     docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
