@@ -56,6 +56,38 @@ Delete existing image
 
 Delete both container and image
 
+`./run-x.sh -b`
+
+Force rebuild the image with --no-cache
+
+`./run-x.sh -h`
+
+Mount host home directory to /host-home in the container
+
+### Mounting Additional Volumes
+
+You can mount additional Docker volumes by setting the `DOCKER_VOLUMES` environment variable. This can be done either:
+
+1. **In your run-[x].sh script** (add before sourcing run-func.sh):
+```bash
+# Single volume
+DOCKER_VOLUMES="myvolume:/app/data"
+
+# Multiple volumes (comma-separated)
+DOCKER_VOLUMES="vol1:/data1,vol2:/data2,vol3:/data3:ro"
+
+source ./run-func.sh
+```
+
+2. **Via environment variable when calling the script**:
+```bash
+# Single volume
+DOCKER_VOLUMES="myvolume:/app/data" ./run-[x].sh
+
+# Named volumes or bind mounts
+DOCKER_VOLUMES="/host/path:/container/path,named-volume:/app/storage" ./run-[x].sh
+```
+
 ## XServer
 
 Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer on the host.

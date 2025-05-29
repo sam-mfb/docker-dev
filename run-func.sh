@@ -6,6 +6,17 @@ local OPTIND o a
 local MOUNT_HOME=""
 local BUILD_FLAGS="--pull"
 local FORCE_BUILD=false
+local EXTRA_VOLUMES=""
+
+# Check for DOCKER_VOLUMES environment variable
+if [[ -n "$DOCKER_VOLUMES" ]]; then
+    IFS=',' read -ra VOLUMES <<< "$DOCKER_VOLUMES"
+    for vol in "${VOLUMES[@]}"; do
+        EXTRA_VOLUMES="$EXTRA_VOLUMES -v $vol"
+    done
+    echo "Will mount additional volumes: $DOCKER_VOLUMES"
+fi
+
 while getopts ":krxbh" option; do
     case $option in
         k)
@@ -54,7 +65,7 @@ if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" 
     #  - set detach key to ctrl z,z to free up ctrl,p (the default)
     #  - set DISPLAY env so we can use XServer over the network
     #  - use a custome seccomp profile that enables chrome sandbox
-    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock ${MOUNT_HOME} --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=custom-seccomp.json -h ${HOSTNAME} -it ${IMAGE_TAG}
+    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock ${MOUNT_HOME} ${EXTRA_VOLUMES} --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=custom-seccomp.json -h ${HOSTNAME} -it ${IMAGE_TAG}
 else
     echo "Starting and attaching to existing container..."
     docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
