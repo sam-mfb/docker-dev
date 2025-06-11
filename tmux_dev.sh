@@ -4,10 +4,29 @@
 MAX_WIDTH=100
 MIN_WIDTH=80
 
-# Name the tmux session
-SESSION_NAME="dev_env"
+# Parse command line options
+SESSION_NAME=""
+while getopts "s:" opt; do
+  case $opt in
+    s)
+      SESSION_NAME="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
 
-# Set the working directory to the first argument, or default to the current working directory
+# Shift past the parsed options
+shift $((OPTIND-1))
+
+# If no session name provided, generate a random one
+if [ -z "$SESSION_NAME" ]; then
+  SESSION_NAME="dev_env_$$_$(date +%s)"
+fi
+
+# Set the working directory to the first argument after options, or default to the current working directory
 WORKING_DIR="${1:-$PWD}"
 
 # Normalize the working directory to an absolute path
