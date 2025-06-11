@@ -128,6 +128,10 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/git
 RUN sudo apt update
 RUN sudo apt install -y gh
 
+# install azure cli
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+RUN az extension add --name azure-devops
+
 # install Claude
 RUN npm install -g @anthropic-ai/claude-code
 ARG ANTHROPIC_API_KEY
