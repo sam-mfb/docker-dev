@@ -67,7 +67,13 @@ if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" 
     #  - use a custome seccomp profile that enables chrome sandbox
     docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock ${MOUNT_HOME} ${EXTRA_VOLUMES} --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=custom-seccomp.json -h ${HOSTNAME} -it ${IMAGE_TAG}
 else
-    echo "Starting and attaching to existing container..."
-    docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
+    # Check if container is already running
+    if [[ "$(docker container ls -q --filter name=${CONTAINER_NAME} 2> /dev/null)" != "" ]]; then
+        echo "Container is already running, attaching to bash shell..."
+        docker exec --detach-keys='ctrl-z,z' -it ${CONTAINER_NAME} bash
+    else
+        echo "Starting and attaching to existing container..."
+        docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
+    fi
 fi
 }
