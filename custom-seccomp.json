@@ -852,6 +852,11 @@
       "args": null
     },
     {
+      "name": "openat2",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "pause",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -1583,6 +1588,66 @@
     },
     {
       "name": "request_key",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "fsopen",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "fsconfig",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "fsmount",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "fspick",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "open_tree",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "move_mount",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "mount",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "umount",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "umount2",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "bpf",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "quotactl",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "perf_event_open",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     }
