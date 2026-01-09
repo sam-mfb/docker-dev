@@ -17,5 +17,6 @@ call plug#begin('~/.vim/plugged')
   Plug 'tomasiser/vim-code-dark'
   Plug 'HerringtonDarkholme/yats.vim'
   Plug 'yuezk/vim-js'
-  Plug 'maxmellon/vim-jsx-pretty' 
+  Plug 'maxmellon/vim-jsx-pretty'
+  Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
