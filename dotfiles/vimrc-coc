@@ -46,10 +46,38 @@ call plug#begin('~/.vim/plugged')
   Plug 'tomasiser/vim-code-dark'
   Plug 'HerringtonDarkholme/yats.vim'
   Plug 'yuezk/vim-js'
-  Plug 'maxmellon/vim-jsx-pretty' 
+  Plug 'maxmellon/vim-jsx-pretty'
+  Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
 let g:coc_global_extensions=[ 'coc-css', 'coc-eslint', 'coc-html', 'coc-json', 'coc-prettier', 'coc-spell-checker', 'coc-tsserver', 'coc-yaml', 'coc-snippets', 'coc-powershell', 'coc-rust-analyzer']
+
+" ============ C# / OmniSharp Configuration ============
+" Disable coc.nvim for C# files (omnisharp-vim handles it)
+autocmd FileType cs let b:coc_enabled = 0
+
+" OmniSharp settings
+let g:OmniSharp_server_stdio = 1
+let g:OmniSharp_server_use_net6 = 1
+let g:OmniSharp_start_server = 1
+
+" C# completion
+autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
+
+" C# mappings (mirror coc mappings for consistency)
+autocmd FileType cs nmap <buffer> gd <Plug>(omnisharp_go_to_definition)
+autocmd FileType cs nmap <buffer> gdv :OmniSharpGotoDefinition vsplit<CR>
+autocmd FileType cs nmap <buffer> gdt :OmniSharpGotoDefinition tabedit<CR>
+autocmd FileType cs nmap <buffer> gy <Plug>(omnisharp_find_type)
+autocmd FileType cs nmap <buffer> gi <Plug>(omnisharp_find_implementations)
+autocmd FileType cs nmap <buffer> gr <Plug>(omnisharp_find_usages)
+autocmd FileType cs nmap <buffer> K <Plug>(omnisharp_documentation)
+autocmd FileType cs nmap <buffer> <leader>rn <Plug>(omnisharp_rename)
+autocmd FileType cs nmap <buffer> <leader>do <Plug>(omnisharp_code_actions)
+autocmd FileType cs nmap <buffer> <leader>f <Plug>(omnisharp_code_format)
+autocmd FileType cs nmap <buffer> <leader>qf <Plug>(omnisharp_fix_usings)
+autocmd FileType cs nmap <buffer> [g <Plug>(omnisharp_navigate_up)
+autocmd FileType cs nmap <buffer> ]g <Plug>(omnisharp_navigate_down)
 
 syntax enable
 set number

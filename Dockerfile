@@ -125,6 +125,16 @@ RUN sudo chmod +x /opt/microsoft/powershell/7/pwsh
 RUN sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
 
+# install .NET 8 SDK
+RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+RUN chmod +x dotnet-install.sh
+RUN ./dotnet-install.sh --channel 8.0
+RUN rm dotnet-install.sh
+ENV DOTNET_ROOT=/home/devuser/.dotnet
+ENV PATH="${PATH}:/home/devuser/.dotnet:/home/devuser/.dotnet/tools"
+# Trust dev certs for local HTTPS
+RUN /home/devuser/.dotnet/dotnet dev-certs https
+
 # install GitHub CLI
 RUN sudo mkdir -p -m 755 /etc/apt/keyrings
 RUN out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg && \
