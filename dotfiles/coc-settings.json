@@ -8,7 +8,8 @@
     "jsonc",
     "css",
     "scss",
-    "markdown"
+    "markdown",
+    "rust"
   ],
   "tsserver.useLocalTsdk":true,
   "powershell.integratedConsole.showOnStartup": false,

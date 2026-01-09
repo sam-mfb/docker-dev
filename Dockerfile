@@ -81,6 +81,12 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/instal
     && nvm install lts/${NODE_LTS_NAME}
 RUN npm install -g npm@${NPM_VERSION}
 
+# Install Rust via rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/home/devuser/.cargo/bin:${PATH}"
+# Install rust-analyzer component
+RUN rustup component add rust-analyzer
+
 ## install git credential forwarder
 RUN npm install -g git-credential-forwarder
 COPY setup-gcf-client.sh ./setup-gcf-client.sh
@@ -104,7 +110,7 @@ COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
 COPY dotfiles/vimrc-coc .vimrc
 RUN mkdir -pv /home/devuser/.config/coc
-RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml coc-snippets coc-powershell' +qa
+RUN . ~/.nvm/nvm.sh && vim +'CocInstall -sync coc-css coc-eslint coc-html coc-json coc-prettier coc-spell-checker coc-tsserver coc-yaml coc-snippets coc-powershell coc-rust-analyzer' +qa
 RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 RUN sudo chown devuser .vim/coc-settings.json
