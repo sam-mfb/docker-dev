@@ -1,13 +1,9 @@
 # docker-dev
 
-Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE. 
-
-See the old2025 branch for other images, e.g., lisp, Swift (both using coc-nvim) and C#/.NET Core (using omnisharp-vim).
+Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE.
 
 ## Setup
 
-- Run `ssh-add` on host to add ssh id to ssh-agent for forwarding
-- Assumes your `.ssh` directory is at the root of your home directory on your machine
 - Copy your `.gitconfig` file into the root of this repo (will not be committed to version control)
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
 - Use `./run.sh` to build and run the dev container
@@ -34,10 +30,17 @@ Host (Docker Desktop)
 ### Docker Access via Claude
 
 Inside the container, Claude has access to Docker through MCP servers:
+
 - **docker** - Run Docker CLI commands
 - **dockerhub** - Search and manage Docker Hub images
 
 Use `/mcp` in Claude to verify the connection. Then ask Claude to run Docker commands like "list running containers" or "search Docker Hub for nginx images".
+
+### Docker Access outside of Claude
+
+The docker socket is also bound into the container. Claude will not use it (it will use the MCP), but you can use the docker cli directly.
+
+The host's .docker/mcp directory is mounted as well which allows you to use `docker mcp` commands to configure the gateway from inside the container. Note any secrets that you set will saved on your host.
 
 ## run.sh
 
@@ -90,7 +93,7 @@ Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer
 
 So does using clipboard transferring with `xclip`
 
-And, it is easier to have it running to use gnome-keyring. It is possible to pass gnome-keyring a password from stdin but i'd have to write some util to get the password in a secure fashion. 
+And, it is easier to have it running to use gnome-keyring. It is possible to pass gnome-keyring a password from stdin but i'd have to write some util to get the password in a secure fashion.
 
 ### On Mac --
 
