@@ -1,12 +1,22 @@
 #!/bin/bash
 
-run_func () {
+# Configuration
+IMAGE_TARGET="ts-dev-align"
+IMAGE_TAG="align-ts-dev"
+CONTAINER_NAME="align-ts-dev-active"
+DOCKER_USER_HOME="/home/devuser"
+HOST_PORTS="3002"
+CONTAINER_PORTS="3000"
+HOSTNAME="ts-docker"
+GIT_REPO="https://MFBTech@dev.azure.com/MFBTech/Syzygy%20Web%20App/_git/align-ts"
+CLONE_DIR="align-ts"
+
 # flags to easily delete image and container
-local OPTIND o a
-local MOUNT_HOME=""
-local BUILD_FLAGS="--pull"
-local FORCE_BUILD=false
-local EXTRA_VOLUMES=""
+OPTIND=1
+MOUNT_HOME=""
+BUILD_FLAGS="--pull"
+FORCE_BUILD=false
+EXTRA_VOLUMES=""
 
 # Check for DOCKER_VOLUMES environment variable
 if [[ -n "$DOCKER_VOLUMES" ]]; then
@@ -76,4 +86,3 @@ else
         docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
     fi
 fi
-}
