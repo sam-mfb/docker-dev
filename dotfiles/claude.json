@@ -4,5 +4,11 @@
   "tipsHistory": {
     "new-user-warmup": 1
   },
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "mcpServers": {
+    "MCP_DOCKER": {
+      "type": "sse",
+      "url": "http://mcp-gateway:8811/sse"
+    }
+  }
 }
