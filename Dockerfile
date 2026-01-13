@@ -10,6 +10,8 @@ ARG O2F_PORT=48272
 ARG PWSH_VERSION=7.5.4
 ARG DOCKER_COMPOSE_VERSION=2.40.3
 ARG DOCKER_SWITCH_VERSION=1.0.5
+ARG GO_VERSION=1.24.1
+ARG DOCKER_MCP_VERSION=main
 
 RUN yes | unminimize
 
@@ -32,6 +34,21 @@ RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
 RUN curl -fL https://github.com/docker/compose-switch/releases/download/v${DOCKER_SWITCH_VERSION}/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
 RUN chmod +x /usr/local/bin/compose-switch
 RUN update-alternatives --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99
+
+# Install Go
+RUN arch=$(dpkg --print-architecture) && \
+    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz" -o go.tar.gz && \
+    tar -C /usr/local -xzf go.tar.gz && \
+    rm go.tar.gz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+# Install docker-mcp CLI plugin
+RUN git clone --depth 1 --branch ${DOCKER_MCP_VERSION} https://github.com/docker/mcp-gateway.git /tmp/mcp-gateway && \
+    cd /tmp/mcp-gateway && \
+    CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /usr/libexec/docker/cli-plugins/docker-mcp ./cmd/docker-mcp && \
+    chmod +x /usr/libexec/docker/cli-plugins/docker-mcp && \
+    cd / && \
+    rm -rf /tmp/mcp-gateway
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
