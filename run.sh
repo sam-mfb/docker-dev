@@ -11,18 +11,23 @@ HOSTNAME="ts-docker"
 GIT_REPO="https://MFBTech@dev.azure.com/MFBTech/Syzygy%20Web%20App/_git/align-ts"
 CLONE_DIR="align-ts"
 
-# flags to easily delete image and container
+# Export for docker-compose
+export IMAGE_TAG CONTAINER_NAME HOST_PORTS CONTAINER_PORTS HOSTNAME
+
 OPTIND=1
-MOUNT_HOME=""
 BUILD_FLAGS="--pull"
 FORCE_BUILD=false
+OVERRIDE_FILE="docker-compose.override.yml"
+NEED_OVERRIDE=false
 EXTRA_VOLUMES=""
+MOUNT_HOME=""
 
 # Check for DOCKER_VOLUMES environment variable
 if [[ -n "$DOCKER_VOLUMES" ]]; then
+    NEED_OVERRIDE=true
     IFS=',' read -ra VOLUMES <<< "$DOCKER_VOLUMES"
     for vol in "${VOLUMES[@]}"; do
-        EXTRA_VOLUMES="$EXTRA_VOLUMES -v $vol"
+        EXTRA_VOLUMES="$EXTRA_VOLUMES      - $vol"$'\n'
     done
     echo "Will mount additional volumes: $DOCKER_VOLUMES"
 fi
@@ -30,16 +35,16 @@ fi
 while getopts ":krxbh" option; do
     case $option in
         k)
-            echo "Deleting container..."
-            docker container rm ${CONTAINER_NAME}
+            echo "Stopping and removing containers..."
+            docker compose down
             exit;;
         r)
             echo "Deleting image..."
             docker rmi ${IMAGE_TAG}
             exit;;
         x)
-            echo "Deleting image and container..."
-            docker container rm ${CONTAINER_NAME}
+            echo "Stopping containers and deleting image..."
+            docker compose down
             docker rmi ${IMAGE_TAG}
             exit;;
         b)
@@ -47,13 +52,14 @@ while getopts ":krxbh" option; do
             FORCE_BUILD=true
             ;;
         h)
-            MOUNT_HOME="--mount type=bind,src=${HOME},target=/host-home"
+            NEED_OVERRIDE=true
+            MOUNT_HOME="      - \${HOME}:/host-home"
             echo "Will mount host home directory to /host-home"
             ;;
     esac
 done
 
-# build image if not built already or if -b flag was used
+# Build image if not built already or if -b flag was used
 if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]] || [[ "$FORCE_BUILD" == true ]]; then
     if [[ "$FORCE_BUILD" == true ]]; then
         echo "Building image (no-cache)..."
@@ -63,26 +69,27 @@ if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]] || [[ "$FORCE_BUI
     docker build ${BUILD_FLAGS} --build-arg GIT_REPO=${GIT_REPO} --build-arg ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} --target ${IMAGE_TARGET} -t ${IMAGE_TAG} .
 fi
 
+# Generate override file if needed for extra volumes or home mount
+if [[ "$NEED_OVERRIDE" == true ]]; then
+    cat > "$OVERRIDE_FILE" << EOF
+services:
+  dev:
+    volumes:
+${MOUNT_HOME}
+${EXTRA_VOLUMES}
+EOF
+    echo "Generated $OVERRIDE_FILE with additional mounts"
+fi
+
 ./launch_X.sh
 
-# run container if not created, otherwise attach to existing
-if [[ "$(docker container ls -qa --filter name=${CONTAINER_NAME} 2> /dev/null)" == "" ]]; then
-    echo "Creating and running container..."
-    # Options:
-    #  - bind ssh to share keys and config
-    #  - bind docker socket to allow docker within docker simulation
-    #  - increase /dev/shm size as chrome needs a lot
-    #  - set detach key to ctrl z,z to free up ctrl,p (the default)
-    #  - set DISPLAY env so we can use XServer over the network
-    #  - use a custome seccomp profile that enables chrome sandbox
-    docker run -p ${HOST_PORTS}:${CONTAINER_PORTS} --mount type=bind,src=/var/run/docker.sock,target=/var/run/docker.sock ${MOUNT_HOME} ${EXTRA_VOLUMES} --shm-size=2gb --detach-keys='ctrl-z,z' --name ${CONTAINER_NAME} -e DISPLAY=host.docker.internal:0 --security-opt seccomp=custom-seccomp.json -h ${HOSTNAME} -it ${IMAGE_TAG}
+# Check if containers are already running
+if [[ "$(docker compose ps -q dev 2> /dev/null)" != "" ]]; then
+    echo "Dev container is already running, attaching to bash shell..."
+    docker compose exec dev bash
 else
-    # Check if container is already running
-    if [[ "$(docker container ls -q --filter name=${CONTAINER_NAME} 2> /dev/null)" != "" ]]; then
-        echo "Container is already running, attaching to bash shell..."
-        docker exec --detach-keys='ctrl-z,z' -it ${CONTAINER_NAME} bash
-    else
-        echo "Starting and attaching to existing container..."
-        docker start --detach-keys='ctrl-z,z' -i ${CONTAINER_NAME}
-    fi
+    echo "Starting services..."
+    docker compose up -d
+    echo "Attaching to dev container..."
+    docker compose exec dev bash
 fi

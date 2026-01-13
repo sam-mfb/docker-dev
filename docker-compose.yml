@@ -1,0 +1,35 @@
+services:
+  mcp-gateway:
+    image: docker/mcp-gateway
+    container_name: mcp-gateway
+    command:
+      - --servers=docker,dockerhub
+      - --transport=sse
+      - --port=8811
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8811:8811"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8811/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  dev:
+    image: ${IMAGE_TAG:-align-ts-dev}
+    container_name: ${CONTAINER_NAME:-align-ts-dev-active}
+    depends_on:
+      mcp-gateway:
+        condition: service_healthy
+    ports:
+      - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
+    shm_size: 2gb
+    hostname: ${HOSTNAME:-ts-docker}
+    environment:
+      - DISPLAY=host.docker.internal:0
+    security_opt:
+      - seccomp=custom-seccomp.json
+    stdin_open: true
+    tty: true

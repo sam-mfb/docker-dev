@@ -13,17 +13,45 @@ See the old2025 branch for other images, e.g., lisp, Swift (both using coc-nvim)
 - Use `./run.sh` to build and run the dev container
 - On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
 
+## Architecture
+
+The dev environment uses Docker Compose to run two containers:
+
+1. **MCP Gateway** (`mcp-gateway`) - Provides Docker access to Claude via MCP servers
+2. **Dev Container** (`dev`) - The development environment with vim, Claude Code, etc.
+
+```
+Host (Docker Desktop)
+├── MCP Gateway Container
+│   ├── Mounts Docker socket
+│   └── Exposes SSE endpoint for MCP
+│
+└── Dev Container
+    ├── Claude Code (connects to gateway via MCP)
+    └── No direct Docker socket access
+```
+
+### Docker Access via Claude
+
+Inside the container, Claude has access to Docker through MCP servers:
+- **docker** - Run Docker CLI commands
+- **dockerhub** - Search and manage Docker Hub images
+
+Use `/mcp` in Claude to verify the connection. Then ask Claude to run Docker commands like "list running containers" or "search Docker Hub for nginx images".
+
 ## run.sh
+
+Uses `docker compose` to manage both the MCP gateway and dev container.
 
 ### Usage
 
 `./run.sh`
 
-Builds image and runs the container. If image is already built that is used. If container already exists that is used.
+Builds image and starts both containers. If already running, attaches to the dev container.
 
 `./run.sh -k`
 
-Delete existing container (make sure there's nothing on there you wanted to save!)
+Stop and remove both containers (make sure there's nothing on there you wanted to save!)
 
 `./run.sh -r`
 
@@ -31,7 +59,7 @@ Delete existing image
 
 `./run.sh -x`
 
-Delete both container and image
+Stop containers and delete image
 
 `./run.sh -b`
 
