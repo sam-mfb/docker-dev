@@ -1,5 +1,11 @@
 {
   "includeCoAuthoredBy": false,
+  "alwaysAllowRead": [
+    "/home/devuser/.claude/MCP_GATEWAY_README.md"
+  ],
+  "companyAnnouncements": [
+    "This environment uses Docker MCP Gateway for containerized MCP servers. Feel free to ask Claude any questions about using it!"
+  ],
   "permissions": {
     "deny": [
       "Bash(docker:*)"
