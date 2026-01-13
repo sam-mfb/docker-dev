@@ -47,6 +47,7 @@ RUN git clone --depth 1 --branch ${DOCKER_MCP_VERSION} https://github.com/docker
     cd /tmp/mcp-gateway && \
     CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o /usr/libexec/docker/cli-plugins/docker-mcp ./cmd/docker-mcp && \
     chmod +x /usr/libexec/docker/cli-plugins/docker-mcp && \
+    cp README.md /tmp/MCP_GATEWAY_README.md && \
     cd / && \
     rm -rf /tmp/mcp-gateway
 
@@ -173,6 +174,7 @@ COPY dotfiles/claude.json .claude.json
 RUN mkdir .claude
 COPY dotfiles/claude.settings.json .claude/settings.json
 COPY dotfiles/CLAUDE.md .claude/CLAUDE.md
+RUN cp /tmp/MCP_GATEWAY_README.md .claude/MCP_GATEWAY_README.md && sudo rm /tmp/MCP_GATEWAY_README.md
 RUN sudo chown devuser .claude.json
 
 RUN npm install -g @microsoft/rush

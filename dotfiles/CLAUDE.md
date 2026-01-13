@@ -12,3 +12,7 @@ args: "images"       # docker images
 args: "logs <name>"  # docker logs
 args: "inspect <id>" # docker inspect
 ```
+
+## MCP Gateway Documentation
+
+For questions about the Docker MCP server (enabling, disabling, configuring, or using MCP features), read the MCP Gateway documentation at `/home/devuser/.claude/MCP_GATEWAY_README.md`.
