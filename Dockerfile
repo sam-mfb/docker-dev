@@ -156,10 +156,6 @@ COPY dotfiles/claude.json .claude.json
 RUN mkdir .claude
 COPY dotfiles/claude.settings.json .claude/settings.json
 RUN sudo chown devuser .claude.json
-## Uncomment if using API KEY
-## COPY add_anthropic_key.sh add_anthropic_key.sh
-## RUN sudo chmod +x add_anthropic_key.sh
-## RUN ./add_anthropic_key.sh
 
 RUN npm install -g @microsoft/rush
 ARG GIT_REPO
