@@ -4,5 +4,14 @@
   "tipsHistory": {
     "new-user-warmup": 1
   },
-  "hasCompletedOnboarding": true
+  "hasCompletedOnboarding": true,
+  "mcpServers": {
+    "Docker MCP Gateway": {
+      "type": "http",
+      "url": "http://host.docker.internal:8811/sse",
+      "headers": {
+        "Authorization": "Bearer ${MCP_GATEWAY_AUTH_TOKEN}"
+      }
+    }
+  }
 }

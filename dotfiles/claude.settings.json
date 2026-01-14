@@ -1,3 +1,11 @@
 {
-  "includeCoAuthoredBy": false
+  "includeCoAuthoredBy": false,
+  "companyAnnouncements": [
+    "This environment uses Docker MCP Gateway for containerized MCP servers."
+  ],
+  "permissions": {
+    "deny": [
+      "Bash(docker:*)"
+    ]
+  }
 }
