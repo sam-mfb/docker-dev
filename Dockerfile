@@ -1,5 +1,5 @@
 # check=skip=SecretsUsedInArgOrEnv
-FROM mcr.microsoft.com/playwright:v1.45.3-noble AS ts-dev-align
+FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
 
 ARG D2_VERSION=0.6.9
 ARG NPM_VERSION=10.8.2
@@ -159,7 +159,5 @@ COPY dotfiles/CLAUDE.md .claude/CLAUDE.md
 RUN sudo chown devuser .claude.json
 
 RUN npm install -g @microsoft/rush
-ARG GIT_REPO
-ENV ALIGN_REPO=${GIT_REPO}
 
 ENTRYPOINT ["bash"]
