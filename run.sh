@@ -91,7 +91,7 @@ else
     # Start host MCP gateway if not already running
     if ! curl -s http://localhost:8811/health > /dev/null 2>&1; then
         echo "Starting Docker MCP gateway on host..."
-        MCP_GATEWAY_AUTH_TOKEN=$MCP_GATEWAY_AUTH_TOKEN docker mcp gateway run --port 8811 --transport streaming > /dev/null 2>&1 &
+        MCP_GATEWAY_AUTH_TOKEN=$MCP_GATEWAY_AUTH_TOKEN docker mcp gateway run --port 8811 --transport streaming --secrets=docker-desktop > /dev/null 2>&1 &
         MCP_PID=$!
         # Wait for gateway to be ready
         for i in {1..10}; do
