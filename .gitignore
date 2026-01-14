@@ -1,3 +1,4 @@
 .gitconfig
 node_modules/
 docker-compose.override.yml
+.mcp-gateway-token

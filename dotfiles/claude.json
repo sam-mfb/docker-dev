@@ -6,9 +6,12 @@
   },
   "hasCompletedOnboarding": true,
   "mcpServers": {
-    "MCP_DOCKER": {
-      "type": "sse",
-      "url": "http://mcp-gateway:8811/sse"
+    "Docker MCP Gateway": {
+      "type": "http",
+      "url": "http://host.docker.internal:8811/sse",
+      "headers": {
+        "Authorization": "Bearer ${MCP_GATEWAY_AUTH_TOKEN}"
+      }
     }
   }
 }

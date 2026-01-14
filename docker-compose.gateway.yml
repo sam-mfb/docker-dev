@@ -1,0 +1,5 @@
+services:
+  dev:
+    depends_on:
+      mcp-gateway:
+        condition: service_healthy

@@ -2,6 +2,8 @@ services:
   mcp-gateway:
     image: docker/mcp-gateway
     container_name: mcp-gateway
+    profiles:
+      - gateway
     command:
       - --servers=docker,dockerhub
       - --transport=sse
@@ -20,15 +22,13 @@ services:
   dev:
     image: ${IMAGE_TAG:-align-ts-dev}
     container_name: ${CONTAINER_NAME:-align-ts-dev-active}
-    depends_on:
-      mcp-gateway:
-        condition: service_healthy
     ports:
       - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
     shm_size: 2gb
     hostname: ${HOSTNAME:-ts-docker}
     environment:
       - DISPLAY=host.docker.internal:0
+      - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     security_opt:
