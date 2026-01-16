@@ -148,6 +148,7 @@ COPY dotfiles/claude.json .claude.json
 RUN mkdir .claude
 COPY dotfiles/claude.settings.json .claude/settings.json
 COPY dotfiles/CLAUDE.md .claude/CLAUDE.md
+COPY dotfiles/claude-agents/ .claude/agents/
 RUN sudo chown devuser .claude.json
 
 RUN npm install -g @microsoft/rush
