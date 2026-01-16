@@ -1,0 +1,6 @@
+# User-specific settings for docker-dev container
+# Copy this file to .settings and fill in your values
+# .settings is gitignored and will not be committed
+
+# Azure DevOps organization name (the part after dev.azure.com/)
+ADO_ORG="your-org-name"

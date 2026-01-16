@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Source user settings if available
+if [[ -f ".settings" ]]; then
+    source .settings
+    echo "Loaded user settings from .settings"
+else
+    echo "Warning: .settings not found - Azure DevOps MCP will not be available"
+    echo "  To enable: cp settings.example .settings && edit .settings"
+fi
+
+# Validate ADO_ORG if set
+if [[ -n "$ADO_ORG" && "$ADO_ORG" == "your-org-name" ]]; then
+    echo "Warning: ADO_ORG not configured - Azure DevOps MCP will not be available"
+    unset ADO_ORG
+fi
+
 # Configuration
 IMAGE_TARGET="sam-dev"
 IMAGE_TAG="sam-dev-container"
@@ -72,6 +87,7 @@ else
     MCP_GATEWAY_AUTH_TOKEN=$(cat "$MCP_TOKEN_FILE")
 fi
 export MCP_GATEWAY_AUTH_TOKEN
+export ADO_ORG
 
 # Set up compose files
 COMPOSE_FILES="-f docker-compose.yml"

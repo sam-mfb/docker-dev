@@ -12,6 +12,10 @@
       "headers": {
         "Authorization": "Bearer ${MCP_GATEWAY_AUTH_TOKEN}"
       }
+    },
+    "Azure DevOps": {
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp", "${ADO_ORG}"]
     }
   }
 }
