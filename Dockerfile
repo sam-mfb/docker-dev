@@ -67,12 +67,6 @@ RUN mkdir -p /home/devuser/.pki/nssdb
 RUN certutil -N --empty-password -d sql:/home/devuser/.pki/nssdb 
 RUN certutil -A -d sql:/home/devuser/.pki/nssdb -t "C,," -n server -i server.crt
 
-# Add public keys for well known repos
-RUN mkdir -p -m 0700 ~/.ssh
-RUN ssh-keyscan github.com >> ~/.ssh/known_hosts
-RUN ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
-COPY dotfiles/sshconfig .ssh/config
-
 # install nvm with a specified version of node; could use a node base image, but this is
 # more flexible
 SHELL ["/bin/bash", "--login", "-c"]
@@ -150,8 +144,6 @@ RUN az extension add --name azure-devops
 
 # install Claude
 RUN npm install -g @anthropic-ai/claude-code
-ARG ANTHROPIC_API_KEY
-ENV ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
 COPY dotfiles/claude.json .claude.json
 RUN mkdir .claude
 COPY dotfiles/claude.settings.json .claude/settings.json
