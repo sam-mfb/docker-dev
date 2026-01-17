@@ -129,6 +129,7 @@ ${MOUNT_HOME}
 ${EXTRA_VOLUMES}
 EOF
     echo "Generated $OVERRIDE_FILE with additional mounts"
+    COMPOSE_FILES="$COMPOSE_FILES -f $OVERRIDE_FILE"
 fi
 
 ./launch_X.sh
