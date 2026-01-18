@@ -44,6 +44,9 @@ sudo chown devuser /var/run/docker.sock
 # git tab completion
 source ~/.git-completion.bash
 
+# github cli auth alias
+alias gha='gh auth login --git-protocol https --web --clipboard'
+
 # setup dbus which is used by chrome and libsecret/gnome-keyring
 
 export NO_AT_BRIDGE=1 
