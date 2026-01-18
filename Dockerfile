@@ -1,15 +1,14 @@
 # check=skip=SecretsUsedInArgOrEnv
 FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
 
-ARG D2_VERSION=0.6.9
-ARG NPM_VERSION=10.8.2
+ARG D2_VERSION=0.7.1
+ARG NPM_VERSION=10.9.2
 ARG NVM_VERSION=0.40.3
 ARG NODE_LTS_NAME=iron
 ARG GCF_PORT=38274
 ARG O2F_PORT=48272
 ARG PWSH_VERSION=7.5.4
-ARG DOCKER_COMPOSE_VERSION=2.40.3
-ARG DOCKER_SWITCH_VERSION=1.0.5
+ARG DOCKER_COMPOSE_VERSION=5.0.1
 
 RUN yes | unminimize
 
@@ -26,12 +25,9 @@ RUN docker buildx install
 # Give container user access to docker socket (which will be bound at container run time)
 RUN touch /var/run/docker.sock
 RUN chgrp sudo /var/run/docker.sock
-# Install docker compose v2
-RUN curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
+# Install docker compose
+RUN curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)" -o /usr/libexec/docker/cli-plugins/docker-compose
 RUN chmod +x /usr/libexec/docker/cli-plugins/docker-compose
-RUN curl -fL https://github.com/docker/compose-switch/releases/download/v${DOCKER_SWITCH_VERSION}/docker-compose-linux-amd64 -o /usr/local/bin/compose-switch
-RUN chmod +x /usr/local/bin/compose-switch
-RUN update-alternatives --install /usr/local/bin/docker-compose docker-compose /usr/local/bin/compose-switch 99
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
