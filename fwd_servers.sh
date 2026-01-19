@@ -5,7 +5,7 @@ SESSION_NAME="node_fwd_servers"
 
 # Server commands (with environment variables included)
 SERVER1_COMMAND="export GIT_CREDENTIAL_FORWARDER_PORT=38274 && gcf-server"
-SERVER2_COMMAND="export OAUTH2_FORWARDER_PORT=48272 && o2f-server"
+SERVER2_COMMAND="export OAUTH2_FORWARDER_PORT=48272 && export OAUTH2_FORWARDER_PASSTHROUGH=true && o2f-server"
 
 # Start a new tmux session
 tmux new-session -d -s "$SESSION_NAME"
