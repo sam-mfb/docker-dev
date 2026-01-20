@@ -81,14 +81,14 @@ ENV PATH="/home/devuser/.cargo/bin:${PATH}"
 RUN rustup component add rust-analyzer
 
 ## install git credential forwarder
-RUN npm install -g git-credential-forwarder
+RUN npm install -g git-credential-forwarder@latest
 COPY setup-gcf-client.sh ./setup-gcf-client.sh
 RUN sudo chmod 755 ./setup-gcf-client.sh
 RUN ./setup-gcf-client.sh
 ENV GIT_CREDENTIAL_FORWARDER_SERVER=host.docker.internal:${GCF_PORT}
 
 ## install oauth2 forwarder
-RUN npm install -g oauth2-forwarder
+RUN npm install -g oauth2-forwarder@latest
 ## use this file via `source ~/.browser_env` if VS code clobbers BROWSER
 COPY dotfiles/browser_env ./.browser_env
 ENV OAUTH2_FORWARDER_SERVER=host.docker.internal:${O2F_PORT}
