@@ -112,6 +112,8 @@ fi
 # Build image if not built already or if -b flag was used
 if [[ "$(docker images -q ${IMAGE_TAG} 2> /dev/null)" == "" ]] || [[ "$FORCE_BUILD" == true ]]; then
     if [[ "$FORCE_BUILD" == true ]]; then
+        echo "Pruning BuildKit cache..."
+        docker builder prune -af --filter=until=0s 2>/dev/null || true
         echo "Building image (no-cache)..."
     else
         echo "Building image..."
