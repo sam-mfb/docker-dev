@@ -142,7 +142,7 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 RUN az extension add --name azure-devops
 
 # install Claude
-RUN npm install -g @anthropic-ai/claude-code
+RUN curl -fsSL https://claude.ai/install.sh | bash
 COPY dotfiles/claude.json .claude.json
 RUN mkdir .claude
 COPY dotfiles/claude.settings.json .claude/settings.json
