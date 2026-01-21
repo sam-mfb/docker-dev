@@ -139,10 +139,10 @@ fi
 # Check if containers are already running
 if [[ "$(docker compose ${COMPOSE_FILES} ps -q dev 2> /dev/null)" != "" ]]; then
     echo "Dev container is already running, attaching to bash shell..."
-    docker compose ${COMPOSE_FILES} exec --detach-keys='ctrl-z,z' dev bash
+    docker exec -it --detach-keys='ctrl-z,z' ${CONTAINER_NAME} bash
 else
     echo "Starting services..."
     docker compose ${COMPOSE_FILES} up -d
     echo "Attaching to dev container..."
-    docker compose ${COMPOSE_FILES} exec --detach-keys='ctrl-z,z' dev bash
+    docker exec -it --detach-keys='ctrl-z,z' ${CONTAINER_NAME} bash
 fi
