@@ -47,6 +47,11 @@
       "args": null
     },
     {
+      "name": "cachestat",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "chdir",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -362,6 +367,21 @@
       "args": null
     },
     {
+      "name": "futex_requeue",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "futex_wait",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "futex_wake",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "futimesat",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -547,6 +567,11 @@
       "args": null
     },
     {
+      "name": "getxattrat",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "inotify_add_watch",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -642,7 +667,17 @@
       "args": null
     },
     {
+      "name": "listmount",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "listxattr",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "listxattrat",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     },
@@ -683,6 +718,11 @@
     },
     {
       "name": "madvise",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "map_shadow_stack",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     },
@@ -773,6 +813,11 @@
     },
     {
       "name": "mremap",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "mseal",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     },
@@ -972,6 +1017,11 @@
       "args": null
     },
     {
+      "name": "removexattrat",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "rename",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -988,6 +1038,11 @@
     },
     {
       "name": "rmdir",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "riscv_hwprobe",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     },
@@ -1307,6 +1362,11 @@
       "args": null
     },
     {
+      "name": "setxattrat",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "shmat",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -1378,6 +1438,11 @@
     },
     {
       "name": "statfs64",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "statmount",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     },
@@ -1522,6 +1587,11 @@
       "args": null
     },
     {
+      "name": "uretprobe",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "unshare",
       "action": "SCMP_ACT_ALLOW",
       "args": null
@@ -1648,6 +1718,26 @@
     },
     {
       "name": "perf_event_open",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "lsm_get_self_attr",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "lsm_list_modules",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "lsm_set_self_attr",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
+      "name": "set_mempolicy_home_node",
       "action": "SCMP_ACT_ALLOW",
       "args": null
     }
