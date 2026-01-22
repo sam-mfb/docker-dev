@@ -141,13 +141,19 @@ RUN sudo apt install -y gh
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 RUN az extension add --name azure-devops
 
-# install Claude
+# install Claude code
 RUN curl -fsSL https://claude.ai/install.sh | bash
 COPY dotfiles/claude.json .claude.json
 COPY dotfiles/claude.settings.json .claude/settings.json
 COPY dotfiles/CLAUDE.md .claude/CLAUDE.md
 COPY dotfiles/claude-agents/ .claude/agents/
 RUN sudo chown devuser .claude.json
+
+# install Gemini CLI
+RUN npm install -g @google/gemini-cli@latest
+
+# install Codex
+RUN npm i -g @openai/codex@latest
 
 RUN npm install -g @microsoft/rush
 
