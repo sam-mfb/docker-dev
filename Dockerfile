@@ -144,7 +144,6 @@ RUN az extension add --name azure-devops
 # install Claude
 RUN curl -fsSL https://claude.ai/install.sh | bash
 COPY dotfiles/claude.json .claude.json
-RUN mkdir .claude
 COPY dotfiles/claude.settings.json .claude/settings.json
 COPY dotfiles/CLAUDE.md .claude/CLAUDE.md
 COPY dotfiles/claude-agents/ .claude/agents/
