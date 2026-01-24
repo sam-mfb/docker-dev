@@ -32,23 +32,23 @@ if [ -d "$CLAUDE_META_DIR/agents" ]; then
     cp -r "$CLAUDE_META_DIR/agents" "$CLAUDE_DIR/agents"
 fi
 
-# Copy commands if they exist in the repo
-if [ -d "$CLAUDE_META_DIR/commands" ]; then
-    echo "Installing commands..."
+# Copy skills to commands (skills are slash commands)
+if [ -d "$CLAUDE_META_DIR/skills" ]; then
+    echo "Installing skills as commands..."
     rm -rf "$CLAUDE_DIR/commands"
-    cp -r "$CLAUDE_META_DIR/commands" "$CLAUDE_DIR/commands"
+    cp -r "$CLAUDE_META_DIR/skills" "$CLAUDE_DIR/commands"
 fi
 
-# Copy settings.json if it exists in the repo
-if [ -f "$CLAUDE_META_DIR/settings.json" ]; then
+# Copy settings.json from general/ if it exists
+if [ -f "$CLAUDE_META_DIR/general/settings.json" ]; then
     echo "Installing settings.json..."
-    cp "$CLAUDE_META_DIR/settings.json" "$CLAUDE_DIR/settings.json"
+    cp "$CLAUDE_META_DIR/general/settings.json" "$CLAUDE_DIR/settings.json"
 fi
 
-# Copy CLAUDE.md if it exists in the repo
-if [ -f "$CLAUDE_META_DIR/CLAUDE.md" ]; then
+# Copy CLAUDE.md from general/ if it exists
+if [ -f "$CLAUDE_META_DIR/general/CLAUDE.md" ]; then
     echo "Installing CLAUDE.md..."
-    cp "$CLAUDE_META_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+    cp "$CLAUDE_META_DIR/general/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 fi
 
 echo "Claude agents and skills updated successfully!"
