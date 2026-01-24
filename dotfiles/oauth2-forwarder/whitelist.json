@@ -2,6 +2,9 @@
   "domains": [
     "login.microsoftonline.com",
     "accounts.google.com",
-    "github.com"
+    "github.com",
+    "login.docker.com",
+    "auth.openai.com",
+    "claude.ai"
   ]
 }
