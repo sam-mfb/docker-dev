@@ -1,0 +1,7 @@
+{
+  "domains": [
+    "login.microsoftonline.com",
+    "accounts.google.com",
+    "github.com"
+  ]
+}
