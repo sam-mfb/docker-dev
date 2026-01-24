@@ -51,5 +51,11 @@ if [ -f "$CLAUDE_META_DIR/general/CLAUDE.md" ]; then
     cp "$CLAUDE_META_DIR/general/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 fi
 
+# Copy claude.json from general/ if it exists (goes to home dir, not .claude/)
+if [ -f "$CLAUDE_META_DIR/general/claude.json" ]; then
+    echo "Installing claude.json..."
+    cp "$CLAUDE_META_DIR/general/claude.json" "$HOME/.claude.json"
+fi
+
 echo "Claude agents and skills updated successfully!"
 echo "Source: $CLAUDE_META_REPO"

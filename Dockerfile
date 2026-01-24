@@ -143,8 +143,6 @@ RUN az extension add --name azure-devops
 
 # install Claude code
 RUN curl -fsSL https://claude.ai/install.sh | bash
-COPY dotfiles/claude.json .claude.json
-RUN sudo chown devuser .claude.json
 
 # install Claude agents and skills from claude-meta repo
 # run update-claude-meta.sh inside the container to get updated versions
