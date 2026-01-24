@@ -143,11 +143,12 @@ RUN az extension add --name azure-devops
 
 # install Claude code
 RUN curl -fsSL https://claude.ai/install.sh | bash
-COPY dotfiles/claude.json .claude.json
-COPY dotfiles/claude.settings.json .claude/settings.json
-COPY dotfiles/CLAUDE.md .claude/CLAUDE.md
-COPY dotfiles/claude-agents/ .claude/agents/
-RUN sudo chown devuser .claude.json
+
+# install Claude agents and skills from claude-meta repo
+# run update-claude-meta.sh inside the container to get updated versions
+COPY update-claude-meta.sh ./update-claude-meta.sh
+RUN sudo chmod 755 ./update-claude-meta.sh
+RUN ./update-claude-meta.sh
 
 # install Gemini CLI
 RUN npm install -g @google/gemini-cli@latest
