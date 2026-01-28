@@ -133,8 +133,8 @@ hi diffRemoved ctermbg=52 guibg=#4a2d2d
 " Fix diff colors for vimdiff
 hi DiffAdd    ctermbg=22 guibg=#2d4a2d
 hi DiffDelete ctermbg=52 guibg=#4a2d2d
-hi DiffChange ctermbg=58 guibg=#4a4a2d
-hi DiffText   ctermbg=94 guibg=#5a4a2d
+hi DiffChange ctermfg=230 ctermbg=58 guifg=#e8e8d0 guibg=#4a4a2d
+hi DiffText   ctermfg=231 ctermbg=130 guifg=#ffffff guibg=#8a5a2d
 
 "let g:airline_theme='oceanicnext'
 
