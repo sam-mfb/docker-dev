@@ -20,4 +20,5 @@ call plug#begin('~/.vim/plugged')
   Plug 'maxmellon/vim-jsx-pretty'
   Plug 'OmniSharp/omnisharp-vim'
   Plug 'dense-analysis/ale'
+  Plug 'tpope/vim-fugitive'
 call plug#end()
