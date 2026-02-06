@@ -4,6 +4,7 @@ services:
     container_name: ${CONTAINER_NAME:-sam-dev-container-active}
     ports:
       - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
+      - "${HOST_PORT_RANGE:-3010-3019}:${CONTAINER_PORT_RANGE:-3010-3019}"
     shm_size: 2gb
     hostname: ${HOSTNAME:-sam-dev}
     environment:
