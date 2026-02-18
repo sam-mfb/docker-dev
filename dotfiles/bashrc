@@ -64,5 +64,5 @@ fi
 
 # Claude Code YOLO mode alias (only available in the experimental container)
 if [[ -n "$EXP_CONTAINER" ]]; then
-    alias yolo='claude --dangerously-skip-permissions'
+    alias claude-yolo='claude --dangerously-skip-permissions'
 fi

@@ -91,7 +91,7 @@ DOCKER_VOLUMES="/host/path:/container/path,named-volume:/app/storage" ./run.sh
 
 An isolated container for running Claude Code in YOLO mode with restricted host access. Uses Docker network-level isolation that cannot be bypassed from inside the container (unlike iptables rules which can be flushed with sudo).
 
-Inside the container, the `yolo` alias runs Claude Code with `--dangerously-skip-permissions`.
+Inside the container, the `claude-yolo` alias runs Claude Code with `--dangerously-skip-permissions`.
 
 ### How it works
 
