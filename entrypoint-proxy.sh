@@ -58,6 +58,12 @@ socat TCP-LISTEN:48272,fork,reuseaddr TCP:host.docker.internal:48272 &
 SOCAT_PID=$!
 echo "socat TCP forwarder started: 48272 -> host.docker.internal:48272 (PID: $SOCAT_PID)"
 
-# --- Start tinyproxy (foreground, keeps container alive) ---
+# --- Start tinyproxy ---
 echo "Starting tinyproxy on port 8888..."
-exec tinyproxy -d
+touch /var/log/tinyproxy.log
+tinyproxy -d &
+TINYPROXY_PID=$!
+
+# Tail the log so it appears in docker logs, and wait on tinyproxy
+tail -f /var/log/tinyproxy.log &
+wait $TINYPROXY_PID
