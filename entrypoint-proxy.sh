@@ -17,18 +17,25 @@ echo "Host IP: $HOST_IP"
 # These rules live in the proxy's network namespace. The exp container
 # (on the internal network) cannot modify them.
 
+# Use ip6tables for IPv6 addresses, iptables for IPv4
+if echo "$HOST_IP" | grep -q ':'; then
+    IPTABLES=ip6tables
+else
+    IPTABLES=iptables
+fi
+
 # Allow established/related connections
-iptables -A OUTPUT -d "$HOST_IP" -m state --state ESTABLISHED,RELATED -j ACCEPT
+$IPTABLES -A OUTPUT -d "$HOST_IP" -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Allow TCP to port 48272 (OAuth2 forwarder)
-iptables -A OUTPUT -d "$HOST_IP" -p tcp --dport 48272 -j ACCEPT
+$IPTABLES -A OUTPUT -d "$HOST_IP" -p tcp --dport 48272 -j ACCEPT
 
 # Allow DNS to host (Docker Desktop routes DNS through the host gateway)
-iptables -A OUTPUT -d "$HOST_IP" -p udp --dport 53 -j ACCEPT
-iptables -A OUTPUT -d "$HOST_IP" -p tcp --dport 53 -j ACCEPT
+$IPTABLES -A OUTPUT -d "$HOST_IP" -p udp --dport 53 -j ACCEPT
+$IPTABLES -A OUTPUT -d "$HOST_IP" -p tcp --dport 53 -j ACCEPT
 
 # Block everything else to the host
-iptables -A OUTPUT -d "$HOST_IP" -j REJECT
+$IPTABLES -A OUTPUT -d "$HOST_IP" -j REJECT
 
 echo "iptables applied: host access restricted to port 48272 + DNS only"
 

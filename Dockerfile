@@ -164,7 +164,7 @@ ENTRYPOINT ["bash"]
 # providing controlled egress via tinyproxy (HTTP/S), socat (OAuth2 TCP),
 # and dnsmasq (DNS). Its own iptables restrict host access to port 48272 + DNS.
 FROM alpine:3.19 AS exp-proxy
-RUN apk add --no-cache tinyproxy socat dnsmasq iptables bash
+RUN apk add --no-cache tinyproxy socat dnsmasq iptables ip6tables bash
 COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
 COPY entrypoint-proxy.sh /entrypoint-proxy.sh
 RUN chmod 755 /entrypoint-proxy.sh
