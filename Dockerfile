@@ -16,7 +16,7 @@ RUN yes | unminimize
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:git-core/ppa
 RUN apt-get update
-RUN apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq
+RUN apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables
 
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -159,3 +159,9 @@ RUN npm i -g @openai/codex@latest
 RUN npm install -g @microsoft/rush
 
 ENTRYPOINT ["bash"]
+
+# Experimental container stage -- isolated variant with firewall entrypoint
+FROM sam-dev AS sam-exp
+COPY entrypoint-exp.sh /home/devuser/entrypoint-exp.sh
+RUN sudo chmod 755 /home/devuser/entrypoint-exp.sh
+ENTRYPOINT ["/home/devuser/entrypoint-exp.sh"]

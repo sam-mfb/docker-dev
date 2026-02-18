@@ -1,0 +1,17 @@
+services:
+  exp:
+    image: ${IMAGE_TAG:-sam-exp-container}
+    container_name: ${CONTAINER_NAME:-sam-exp-container-active}
+    shm_size: 2gb
+    hostname: ${HOSTNAME:-sam-exp}
+    environment:
+      - GIT_CREDENTIAL_FORWARDER_SERVER=
+      - ADO_ORG=${ADO_ORG}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - seccomp=custom-seccomp.json
+    stdin_open: true
+    tty: true
