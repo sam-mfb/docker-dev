@@ -160,8 +160,13 @@ RUN npm install -g @microsoft/rush
 
 ENTRYPOINT ["bash"]
 
-# Experimental container stage -- isolated variant with firewall entrypoint
-FROM sam-dev AS sam-exp
-COPY entrypoint-exp.sh /home/devuser/entrypoint-exp.sh
-RUN sudo chmod 755 /home/devuser/entrypoint-exp.sh
-ENTRYPOINT ["/home/devuser/entrypoint-exp.sh"]
+# Proxy sidecar for experimental container network isolation
+# Lightweight alpine container that bridges internal and external networks,
+# providing controlled egress via tinyproxy (HTTP/S), socat (OAuth2 TCP),
+# and dnsmasq (DNS). Its own iptables restrict host access to port 48272 + DNS.
+FROM alpine:3.19 AS exp-proxy
+RUN apk add --no-cache tinyproxy socat dnsmasq iptables bash
+COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
+COPY entrypoint-proxy.sh /entrypoint-proxy.sh
+RUN chmod 755 /entrypoint-proxy.sh
+ENTRYPOINT ["/entrypoint-proxy.sh"]
