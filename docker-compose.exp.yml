@@ -21,7 +21,7 @@ services:
     cap_add:
       - NET_ADMIN
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8888"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8888"]
       interval: 2s
       timeout: 3s
       retries: 10
