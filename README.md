@@ -87,6 +87,56 @@ DOCKER_VOLUMES="vol1:/data1,vol2:/data2,vol3:/data3:ro" ./run.sh
 DOCKER_VOLUMES="/host/path:/container/path,named-volume:/app/storage" ./run.sh
 ```
 
+## Experimental Container (run-exp.sh)
+
+An isolated container for running Claude Code in YOLO mode with restricted host access. Uses Docker network-level isolation that cannot be bypassed from inside the container (unlike iptables rules which can be flushed with sudo).
+
+Inside the container, the `yolo` alias runs Claude Code with `--dangerously-skip-permissions`.
+
+### How it works
+
+The experimental container sits on a Docker `internal: true` network with no gateway -- it has no direct route to the host or internet. A lightweight proxy sidecar (alpine + tinyproxy/socat/dnsmasq) bridges the internal and external networks:
+
+- **Internet access** via HTTP/HTTPS proxy (tinyproxy on the sidecar)
+- **OAuth2 forwarding** via TCP pipe to host port 48272 only (socat on the sidecar)
+- **DNS resolution** via DNS forwarder (dnsmasq on the sidecar)
+- **Host access blocked** by iptables on the proxy sidecar (separate container, unreachable from exp)
+
+What's restricted vs the dev container:
+- No Docker socket
+- No host volume mounts
+- No git credential forwarding (port 38274 is unreachable)
+- No X11 display
+- No MCP gateway
+
+### Usage
+
+`./run-exp.sh`
+
+Builds both images (main + proxy sidecar) and starts the containers. If already running, attaches to the exp container.
+
+`./run-exp.sh -k`
+
+Stop and remove both containers.
+
+`./run-exp.sh -r`
+
+Delete both images.
+
+`./run-exp.sh -x`
+
+Stop both containers and delete both images.
+
+`./run-exp.sh -b`
+
+Force rebuild both images with --no-cache.
+
+### Limitations
+
+- Tools that don't respect `HTTP_PROXY`/`HTTPS_PROXY` will fail to connect (fail-closed, which is the intended security behavior)
+- Use HTTPS git URLs -- git over SSH won't work through the HTTP proxy
+- Authenticate git via `gh auth login --web` (uses the OAuth2 forwarder) then `gh auth setup-git`
+
 ## XServer
 
 Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer on the host.

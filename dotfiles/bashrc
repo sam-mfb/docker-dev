@@ -61,3 +61,8 @@ if [[ -z $TMUX && -z $NO_DBUS_CONFIG ]]; then
 
     gnome-keyring-daemon --start --components=secrets &> /tmp/gnome-keyring.log
 fi
+
+# Claude Code YOLO mode alias (only available in the experimental container)
+if [[ -n "$EXP_CONTAINER" ]]; then
+    alias yolo='claude --dangerously-skip-permissions'
+fi

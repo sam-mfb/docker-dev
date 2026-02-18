@@ -39,6 +39,7 @@ services:
     dns:
       - 172.30.0.2
     environment:
+      - EXP_CONTAINER=1
       - GIT_CREDENTIAL_FORWARDER_SERVER=
       - OAUTH2_FORWARDER_SERVER=proxy:48272
       - HTTP_PROXY=http://proxy:8888
