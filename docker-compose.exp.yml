@@ -40,7 +40,6 @@ services:
       - 172.30.0.2
     environment:
       - EXP_CONTAINER=1
-      - GIT_CREDENTIAL_FORWARDER_SERVER=
       - OAUTH2_FORWARDER_SERVER=proxy:48272
       - HTTP_PROXY=http://proxy:8888
       - HTTPS_PROXY=http://proxy:8888
@@ -54,5 +53,13 @@ services:
     depends_on:
       proxy:
         condition: service_healthy
+    command:
+      - -c
+      - |
+        # Remove git credential forwarder -- not used in exp container
+        sudo git config --system --unset-all credential.helper 2>/dev/null || true
+        git config --global --unset-all credential.helper 2>/dev/null || true
+        git config --global --unset credential.https://dev.azure.com.useHttpPath 2>/dev/null || true
+        exec sleep infinity
     stdin_open: true
     tty: true
