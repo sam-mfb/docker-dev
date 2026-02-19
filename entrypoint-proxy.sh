@@ -42,9 +42,11 @@ echo "iptables applied: host access restricted to port 48272 + DNS only"
 # --- Start dnsmasq ---
 # Forward DNS queries to Docker's embedded DNS (127.0.0.11)
 # This allows the exp container to resolve both container names and external domains
+# Only bind to the internal-facing IP so dnsmasq doesn't shadow Docker's
+# embedded DNS on 127.0.0.11 (which tinyproxy needs for external resolution)
 dnsmasq \
     --no-daemon \
-    --listen-address=0.0.0.0 \
+    --listen-address=172.30.0.2 \
     --port=53 \
     --server=127.0.0.11 \
     --log-queries \
