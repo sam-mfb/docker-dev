@@ -1,0 +1,65 @@
+networks:
+  exp-internal:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+  exp-external:
+    driver: bridge
+
+services:
+  proxy:
+    image: ${PROXY_IMAGE_TAG:-exp-proxy-container}
+    container_name: ${PROXY_CONTAINER_NAME:-exp-proxy-container-active}
+    hostname: proxy
+    networks:
+      exp-internal:
+        ipv4_address: 172.30.0.2
+      exp-external: {}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    cap_add:
+      - NET_ADMIN
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8888"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  exp:
+    image: ${IMAGE_TAG:-sam-exp-container}
+    container_name: ${CONTAINER_NAME:-sam-exp-container-active}
+    shm_size: 2gb
+    hostname: ${HOSTNAME:-sam-exp}
+    networks:
+      exp-internal:
+        ipv4_address: 172.30.0.3
+    dns:
+      - 172.30.0.2
+    environment:
+      - EXP_CONTAINER=1
+      - OAUTH2_FORWARDER_SERVER=proxy:48272
+      - HTTP_PROXY=http://proxy:8888
+      - HTTPS_PROXY=http://proxy:8888
+      - http_proxy=http://proxy:8888
+      - https_proxy=http://proxy:8888
+      - NO_PROXY=proxy,172.30.0.2,localhost,127.0.0.1
+      - no_proxy=proxy,172.30.0.2,localhost,127.0.0.1
+      - ADO_ORG=${ADO_ORG}
+    security_opt:
+      - seccomp=custom-seccomp.json
+    depends_on:
+      proxy:
+        condition: service_healthy
+    command:
+      - -c
+      - |
+        # Remove git credential forwarder -- not used in exp container
+        sudo git config --system --unset-all credential.helper 2>/dev/null || true
+        git config --global --unset-all credential.helper 2>/dev/null || true
+        git config --global --unset credential.https://dev.azure.com.useHttpPath 2>/dev/null || true
+        exec sleep infinity
+    stdin_open: true
+    tty: true

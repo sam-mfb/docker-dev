@@ -15,8 +15,7 @@ RUN yes | unminimize
 # Add Git PPA for latest stable version
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN apt-get update
-RUN apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq
+RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables
 
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -42,6 +41,7 @@ ENV LC_ALL=en_US.UTF-8
 #setup dev user
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN echo 'Defaults env_keep += "http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY"' >> /etc/sudoers
 WORKDIR /home/devuser
 USER devuser
 ENV TERM="xterm-256color"
@@ -143,6 +143,7 @@ RUN az extension add --name azure-devops
 
 # install Claude code
 RUN curl -fsSL https://claude.ai/install.sh | bash
+ENV PATH="/home/devuser/.local/bin:${PATH}"
 
 # install Claude agents and skills from claude-meta repo
 # run update-claude-meta.sh inside the container to get updated versions
@@ -159,3 +160,14 @@ RUN npm i -g @openai/codex@latest
 RUN npm install -g @microsoft/rush
 
 ENTRYPOINT ["bash"]
+
+# Proxy sidecar for experimental container network isolation
+# Lightweight alpine container that bridges internal and external networks,
+# providing controlled egress via tinyproxy (HTTP/S), socat (OAuth2 TCP),
+# and dnsmasq (DNS). Its own iptables restrict host access to port 48272 + DNS.
+FROM alpine:3.19 AS exp-proxy
+RUN apk add --no-cache tinyproxy socat dnsmasq iptables ip6tables bash
+COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
+COPY entrypoint-proxy.sh /entrypoint-proxy.sh
+RUN chmod 755 /entrypoint-proxy.sh
+ENTRYPOINT ["/entrypoint-proxy.sh"]
