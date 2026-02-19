@@ -41,6 +41,7 @@ ENV LC_ALL=en_US.UTF-8
 #setup dev user
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN echo 'Defaults env_keep += "http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY"' >> /etc/sudoers
 WORKDIR /home/devuser
 USER devuser
 ENV TERM="xterm-256color"
