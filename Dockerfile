@@ -144,6 +144,7 @@ RUN az extension add --name azure-devops
 # install Claude code
 RUN curl -fsSL https://claude.ai/install.sh | bash
 ENV PATH="/home/devuser/.local/bin:${PATH}"
+RUN claude --version || { echo "FATAL: Claude Code failed to install"; exit 1; }
 
 # install Claude agents and skills from claude-meta repo
 # run update-claude-meta.sh inside the container to get updated versions
