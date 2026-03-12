@@ -136,8 +136,6 @@ EOF
     COMPOSE_FILES="$COMPOSE_FILES -f $OVERRIDE_FILE"
 fi
 
-./launch_X.sh
-
 # Check if containers are already running
 if [[ "$(docker compose ${COMPOSE_FILES} ps -q dev 2> /dev/null)" != "" ]]; then
     echo "Dev container is already running, attaching to bash shell..."
