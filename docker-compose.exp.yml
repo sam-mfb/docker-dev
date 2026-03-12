@@ -31,6 +31,7 @@ services:
   exp:
     image: ${IMAGE_TAG:-sam-exp-container}
     container_name: ${CONTAINER_NAME:-sam-exp-container-active}
+    entrypoint: ["bash"]
     shm_size: 2gb
     hostname: ${HOSTNAME:-sam-exp}
     networks:

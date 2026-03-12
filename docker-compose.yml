@@ -5,10 +5,10 @@ services:
     ports:
       - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
       - "${HOST_PORT_RANGE:-3010-3019}:${CONTAINER_PORT_RANGE:-3010-3019}"
+      - "${NOVNC_HOST_PORT:-6080}:6080"
     shm_size: 2gb
     hostname: ${HOSTNAME:-sam-dev}
     environment:
-      - DISPLAY=host.docker.internal:0
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN}
       - ADO_ORG=${ADO_ORG}
     volumes:

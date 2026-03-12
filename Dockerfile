@@ -15,7 +15,7 @@ RUN yes | unminimize
 # Add Git PPA for latest stable version
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables
+RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables xvfb x11vnc novnc websockify
 
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -98,6 +98,10 @@ ENV BROWSER=o2f-browser
 COPY tmux_dev.sh ./tmux_dev.sh
 RUN sudo chmod 755 ./tmux_dev.sh
 
+## noVNC entrypoint
+COPY entrypoint.sh /home/devuser/entrypoint.sh
+RUN sudo chmod 755 /home/devuser/entrypoint.sh
+
 ## setup coc
 COPY dotfiles/vimrc-coc-install .vimrc
 RUN vim +'PlugInstall --sync' +qa
@@ -108,6 +112,12 @@ RUN . ~/.nvm/nvm.sh && vim +'CocUpdateSync' +qa
 COPY dotfiles/coc-settings.json .vim/coc-settings.json
 RUN sudo chown devuser .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
+
+# Xvfb + noVNC display configuration (placed after vim plugin installs which run headlessly)
+ENV DISPLAY=:99
+ENV VNC_RESOLUTION=1280x1024x24
+ENV VNC_PORT=5900
+ENV NOVNC_PORT=6080
 
 # install powershell
 RUN sudo mkdir -p /opt/microsoft/powershell/7
@@ -160,7 +170,8 @@ RUN npm i -g @openai/codex@latest
 
 RUN npm install -g @microsoft/rush
 
-ENTRYPOINT ["bash"]
+ENTRYPOINT ["/home/devuser/entrypoint.sh"]
+CMD ["bash"]
 
 # Proxy sidecar for experimental container network isolation
 # Lightweight alpine container that bridges internal and external networks,
