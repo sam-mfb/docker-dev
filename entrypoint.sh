@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Start Xvfb on display :99
 Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
@@ -8,8 +7,8 @@ sleep 1
 # Sync X CLIPBOARD and PRIMARY selections so that:
 #   - vim/tmux yanks (CLIPBOARD) are visible to VNC (PRIMARY)
 #   - noVNC pastes (PRIMARY) are visible to xclip (CLIPBOARD)
-autocutsel -fork
-autocutsel -selection PRIMARY -fork
+autocutsel -fork || echo "Warning: autocutsel (CLIPBOARD) failed to start"
+autocutsel -selection PRIMARY -fork || echo "Warning: autocutsel (PRIMARY) failed to start"
 
 # Start x11vnc (no password — localhost only)
 x11vnc -display ${DISPLAY} -forever -shared -rfbport ${VNC_PORT:-5900} -nopw &
