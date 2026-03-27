@@ -47,6 +47,22 @@ source ~/.git-completion.bash
 # github cli auth alias
 alias gha='gh auth login --git-protocol https --web --clipboard'
 
+# Start Xvfb + noVNC stack (once) if not already running
+# DISPLAY is unset during docker build (ENV is placed after all RUN steps)
+if [[ -n "$DISPLAY" ]] && ! pgrep -x Xvfb > /dev/null 2>&1; then
+    Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
+    for i in $(seq 1 50); do
+        xdpyinfo -display ${DISPLAY} > /dev/null 2>&1 && break
+        sleep 0.1
+    done
+    x11vnc -display ${DISPLAY} -forever -shared -rfbport ${VNC_PORT:-5900} -nopw &
+    sleep 0.5
+    websockify --web /usr/share/novnc ${NOVNC_PORT:-6080} localhost:${VNC_PORT:-5900} &
+    autocutsel &
+    autocutsel -selection PRIMARY &
+    echo "noVNC available at http://localhost:${NOVNC_PORT:-6080}/vnc.html"
+fi
+
 # setup dbus which is used by chrome and libsecret/gnome-keyring
 
 export NO_AT_BRIDGE=1 
