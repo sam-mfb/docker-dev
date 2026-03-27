@@ -47,8 +47,9 @@ source ~/.git-completion.bash
 # github cli auth alias
 alias gha='gh auth login --git-protocol https --web --clipboard'
 
-# Start Xvfb + noVNC stack (once) if not already running (skip during docker build)
-if [[ $- == *i* ]] && ! pgrep -x Xvfb > /dev/null 2>&1; then
+# Start Xvfb + noVNC stack (once) if not already running
+# DISPLAY is unset during docker build (ENV is placed after all RUN steps)
+if [[ -n "$DISPLAY" ]] && ! pgrep -x Xvfb > /dev/null 2>&1; then
     Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
     sleep 1
     autocutsel -fork

@@ -113,12 +113,6 @@ COPY dotfiles/coc-settings.json .vim/coc-settings.json
 RUN sudo chown devuser .vim/coc-settings.json
 COPY dotfiles/popup_scroll.vim .vim/autoload/popup_scroll.vim
 
-# Xvfb + noVNC display configuration (placed after vim plugin installs which run headlessly)
-ENV DISPLAY=:99
-ENV VNC_RESOLUTION=1280x1024x24
-ENV VNC_PORT=5900
-ENV NOVNC_PORT=6080
-
 # install powershell
 RUN sudo mkdir -p /opt/microsoft/powershell/7
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/x64/) && \
@@ -169,6 +163,13 @@ RUN npm install -g @google/gemini-cli@latest
 RUN npm i -g @openai/codex@latest
 
 RUN npm install -g @microsoft/rush
+
+# Xvfb + noVNC display configuration (placed last so DISPLAY is unset during
+# build RUN steps, preventing bashrc from starting the VNC stack mid-build)
+ENV DISPLAY=:99
+ENV VNC_RESOLUTION=1280x1024x24
+ENV VNC_PORT=5900
+ENV NOVNC_PORT=6080
 
 ENTRYPOINT ["/home/devuser/entrypoint.sh"]
 CMD ["bash"]
