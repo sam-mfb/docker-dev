@@ -341,5 +341,5 @@ let g:clipboard = {
         \ '+': 'xclip -selection clipboard -o',
         \ '*': 'xclip -selection clipboard -o',
     \ },
-    \ 'cache_enabled': 1,
+    \ 'cache_enabled': 0,
 \ }
