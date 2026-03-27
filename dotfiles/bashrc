@@ -47,6 +47,18 @@ source ~/.git-completion.bash
 # github cli auth alias
 alias gha='gh auth login --git-protocol https --web --clipboard'
 
+# Start Xvfb + noVNC stack (once) if not already running
+if ! pgrep -x Xvfb > /dev/null 2>&1; then
+    Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
+    sleep 1
+    autocutsel -fork
+    autocutsel -selection PRIMARY -fork
+    x11vnc -display ${DISPLAY} -forever -shared -rfbport ${VNC_PORT:-5900} -nopw &
+    sleep 0.5
+    websockify --web /usr/share/novnc ${NOVNC_PORT:-6080} localhost:${VNC_PORT:-5900} &
+    echo "noVNC available at http://localhost:${NOVNC_PORT:-6080}/vnc.html"
+fi
+
 # setup dbus which is used by chrome and libsecret/gnome-keyring
 
 export NO_AT_BRIDGE=1 
