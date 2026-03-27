@@ -11,6 +11,7 @@ services:
     environment:
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN}
       - ADO_ORG=${ADO_ORG}
+      - ENABLE_CLAUDEAI_MCP_SERVERS=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     security_opt:
