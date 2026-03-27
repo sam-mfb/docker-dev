@@ -51,7 +51,10 @@ alias gha='gh auth login --git-protocol https --web --clipboard'
 # DISPLAY is unset during docker build (ENV is placed after all RUN steps)
 if [[ -n "$DISPLAY" ]] && ! pgrep -x Xvfb > /dev/null 2>&1; then
     Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
-    sleep 1
+    for i in $(seq 1 50); do
+        xdpyinfo -display ${DISPLAY} > /dev/null 2>&1 && break
+        sleep 0.1
+    done
     autocutsel -fork
     autocutsel -selection PRIMARY -fork
     x11vnc -display ${DISPLAY} -forever -shared -rfbport ${VNC_PORT:-5900} -nopw &
