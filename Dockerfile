@@ -38,6 +38,9 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
+# Pre-create X11 socket directory so Xvfb can run as non-root
+RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+
 #setup dev user
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
