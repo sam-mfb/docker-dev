@@ -30,6 +30,9 @@ $IPTABLES -A OUTPUT -d "$HOST_IP" -m state --state ESTABLISHED,RELATED -j ACCEPT
 # Allow TCP to port 48272 (OAuth2 forwarder)
 $IPTABLES -A OUTPUT -d "$HOST_IP" -p tcp --dport 48272 -j ACCEPT
 
+# Allow TCP to port 11434 (Ollama API on the host)
+$IPTABLES -A OUTPUT -d "$HOST_IP" -p tcp --dport 11434 -j ACCEPT
+
 # Allow DNS to host (Docker Desktop routes DNS through the host gateway)
 $IPTABLES -A OUTPUT -d "$HOST_IP" -p udp --dport 53 -j ACCEPT
 $IPTABLES -A OUTPUT -d "$HOST_IP" -p tcp --dport 53 -j ACCEPT
@@ -37,7 +40,7 @@ $IPTABLES -A OUTPUT -d "$HOST_IP" -p tcp --dport 53 -j ACCEPT
 # Block everything else to the host
 $IPTABLES -A OUTPUT -d "$HOST_IP" -j REJECT
 
-echo "iptables applied: host access restricted to port 48272 + DNS only"
+echo "iptables applied: host access restricted to ports 48272, 11434 + DNS only"
 
 # --- Start dnsmasq ---
 # Forward DNS queries to Docker's embedded DNS (127.0.0.11)
@@ -59,6 +62,11 @@ echo "dnsmasq started (PID: $DNSMASQ_PID)"
 socat TCP-LISTEN:48272,fork,reuseaddr TCP:host.docker.internal:48272 &
 SOCAT_PID=$!
 echo "socat TCP forwarder started: 48272 -> host.docker.internal:48272 (PID: $SOCAT_PID)"
+
+# --- Start socat for Ollama API ---
+socat TCP-LISTEN:11434,fork,reuseaddr TCP:host.docker.internal:11434 &
+SOCAT_OLLAMA_PID=$!
+echo "socat TCP forwarder started: 11434 -> host.docker.internal:11434 (PID: $SOCAT_OLLAMA_PID)"
 
 # --- Start tinyproxy ---
 echo "Starting tinyproxy on port 8888..."

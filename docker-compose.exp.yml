@@ -42,6 +42,7 @@ services:
     environment:
       - EXP_CONTAINER=1
       - OAUTH2_FORWARDER_SERVER=proxy:48272
+      - OLLAMA_HOST=http://proxy:11434
       - HTTP_PROXY=http://proxy:8888
       - HTTPS_PROXY=http://proxy:8888
       - http_proxy=http://proxy:8888
