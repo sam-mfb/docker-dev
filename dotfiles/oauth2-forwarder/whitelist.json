@@ -2,9 +2,15 @@
   "domains": [
     "login.microsoftonline.com",
     "accounts.google.com",
+    "google.com",
+    "goo.gle",
     "github.com",
     "login.docker.com",
     "auth.openai.com",
-    "claude.ai"
+    "claude.ai",
+    "claude.com",
+    "api.fireflies.ai",
+    "todoist.com",
+    "mcp.atlassian.com"
   ]
 }
