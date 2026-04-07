@@ -22,7 +22,7 @@ check_ollama_version() {
     if [[ -z "$pinned" ]]; then return; fi
     local latest
     latest=$(curl -sfL -o /dev/null -w '%{url_effective}' https://github.com/ollama/ollama/releases/latest 2>/dev/null \
-        | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+        | sed -n 's/.*\/v\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
     if [[ -n "$latest" && "$latest" != "$pinned" ]]; then
         echo ""
         echo "*** Ollama update available: $pinned -> $latest ***"
