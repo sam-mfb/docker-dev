@@ -72,9 +72,26 @@ Force rebuild the image with --no-cache
 
 Mount host home directory to /host-home in the container
 
+`./run.sh -m <path>`
+
+Bind mount a host directory into the container at `/host-mnt<path>`. The path is resolved to an absolute path. Can be specified multiple times to mount several directories.
+
+```bash
+# Mount a single directory
+./run.sh -m /Users/sam/projects
+
+# This mounts /Users/sam/projects on the host to /host-mnt/Users/sam/projects in the container
+
+# Mount multiple directories
+./run.sh -m /Users/sam/projects -m /Users/sam/data
+
+# Combine with other flags
+./run.sh -h -m /Users/sam/projects
+```
+
 ### Mounting Additional Volumes
 
-You can mount additional Docker volumes by setting the `DOCKER_VOLUMES` environment variable:
+For full control over volume syntax (named volumes, read-only mounts, custom container paths), use the `DOCKER_VOLUMES` environment variable:
 
 ```bash
 # Single volume

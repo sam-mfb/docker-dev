@@ -65,7 +65,7 @@ if [[ -n "$DOCKER_VOLUMES" ]]; then
     echo "Will mount additional volumes: $DOCKER_VOLUMES"
 fi
 
-while getopts ":krxbh" option; do
+while getopts ":krxbhm:" option; do
     case $option in
         k)
             echo "Stopping and removing containers..."
@@ -92,6 +92,13 @@ while getopts ":krxbh" option; do
             NEED_OVERRIDE=true
             MOUNT_HOME="      - \${HOME}:/host-home"
             echo "Will mount host home directory to /host-home"
+            ;;
+        m)
+            NEED_OVERRIDE=true
+            # Resolve to absolute path
+            MOUNT_PATH="$(cd "$OPTARG" 2>/dev/null && pwd || echo "$OPTARG")"
+            EXTRA_VOLUMES="$EXTRA_VOLUMES      - ${MOUNT_PATH}:/host-mnt${MOUNT_PATH}"$'\n'
+            echo "Will bind mount ${MOUNT_PATH} to /host-mnt${MOUNT_PATH}"
             ;;
     esac
 done
