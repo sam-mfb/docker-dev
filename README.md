@@ -6,25 +6,31 @@ Dockerfile and scripts to setup a linux dev environment pre-configured for using
 
 - Copy your `.gitconfig` file into the root of this repo (will not be committed to version control)
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
+- Copy `settings.example` to `.settings` and set `TS_AUTHKEY` (required — see [Tailscale](#tailscale) below). Optionally set `ADO_ORG` to enable the Azure DevOps MCP.
 - Use `./run.sh` to build and run the dev container
 - On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
 
 ## Architecture
 
-The dev environment uses Docker Compose to run two containers:
+The dev environment uses Docker Compose to run two containers, plus an MCP gateway started on the host by `run.sh`:
 
-1. **MCP Gateway** (`mcp-gateway`) - Provides Docker access to Claude via MCP servers
-2. **Dev Container** (`dev`) - The development environment with vim, Claude Code, etc.
+1. **MCP Gateway** (host process) - Provides Docker access to Claude via MCP servers, listening on `localhost:8811`
+2. **Tailscale Sidecar** (`tailscale`) - Owns the network namespace shared with the dev container; provides outbound tailnet access and MagicDNS
+3. **Dev Container** (`dev`) - The development environment with vim, Claude Code, etc., sharing the sidecar's network namespace via `network_mode: service:tailscale`
 
 ```
 Host (Docker Desktop)
-├── MCP Gateway Container
-│   ├── Mounts Docker socket
-│   └── Exposes SSE endpoint for MCP
+├── MCP Gateway (host process on :8811)
 │
-└── Dev Container
+├── Tailscale Sidecar
+│   ├── Owns the shared network namespace
+│   ├── Publishes ports to the host (3002, 3010-3019, 6080)
+│   └── tailscale0 interface (shields-up: no inbound from peers)
+│
+└── Dev Container (network_mode: service:tailscale)
     ├── Claude Code (connects to gateway via MCP)
-    └── No direct Docker socket access
+    ├── Reaches tailnet peers by MagicDNS name
+    └── Shares loopback + interfaces with the sidecar
 ```
 
 ### Docker Access via Claude
@@ -41,6 +47,44 @@ Use `/mcp` in Claude to verify the connection. Then ask Claude to run Docker com
 The docker socket is also bound into the container. Claude will not use it (it will use the MCP), but you can use the docker cli directly.
 
 The host's .docker/mcp directory is mounted as well which allows you to use `docker mcp` commands to configure the gateway from inside the container. Note any secrets that you set will saved on your host.
+
+## Tailscale
+
+The `tailscale` sidecar gives the dev container outbound access to your tailnet, including MagicDNS resolution for peer hostnames. The dev container shares the sidecar's network namespace, so no Tailscale client is installed in the dev image itself — `curl http://my-peer:8080` and `getent hosts my-peer` just work.
+
+### Setup
+
+Generate a reusable, ephemeral auth key at <https://login.tailscale.com/admin/settings/keys> and put it in `.settings`:
+
+```sh
+TS_AUTHKEY="tskey-auth-..."
+```
+
+`run.sh` validates this before bringing the stack up. Teardown flags (`-k`, `-r`, `-x`) work without a key set.
+
+The sidecar registers in your tailnet using `HOSTNAME` (default `sam-dev`) as its device name. Tailscale state persists in the `tailscale-state` named volume, so the device doesn't re-register on every run. `docker compose down -v` would wipe it.
+
+### Inbound is blocked (shields-up)
+
+The sidecar runs with `--shields-up`, which blocks all inbound connections from tailnet peers. Outbound connections and MagicDNS still work. Host port publishing (e.g. `localhost:3002`) is unaffected because that traffic arrives on the sidecar's docker bridge interface, not on `tailscale0`.
+
+If a process in the dev container binds to `0.0.0.0`, shields-up is what prevents it from being reachable from the tailnet. Bind to `127.0.0.1` if you want to be doubly sure.
+
+### Network namespace sharing
+
+Because `dev` uses `network_mode: service:tailscale`:
+
+- All `ports:` declarations live on the `tailscale` service, not `dev`.
+- `localhost` inside dev reaches anything tailscaled is listening on, and vice versa. Avoid port collisions with tailscaled's local API.
+- `/etc/resolv.conf` in dev points at tailscaled's resolver — that's how MagicDNS works.
+- `ip addr` in dev shows the sidecar's interfaces, including `tailscale0`.
+- If the sidecar restarts, the dev container loses its network until both come back. `./run.sh` recovers.
+
+### Kernel vs userspace mode
+
+The sidecar uses kernel networking (`TS_USERSPACE=false`) which requires `/dev/net/tun` and `NET_ADMIN`/`NET_RAW` caps. This works out of the box on Docker Desktop (Mac, Windows, WSL) because Docker's Linux VM ships with the `tun` module.
+
+If you ever run on an engine that doesn't expose `/dev/net/tun` (some Colima/Lima profiles, minimal Linux hosts), flip `TS_USERSPACE=true` in `docker-compose.yml` and drop the tun mount + caps. In userspace mode there's no `tailscale0` interface, so apps reach the tailnet via tailscaled's SOCKS5 proxy on `localhost:1055` (`ALL_PROXY=socks5h://localhost:1055`).
 
 ## run.sh
 
