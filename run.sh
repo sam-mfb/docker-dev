@@ -116,17 +116,18 @@ export MCP_GATEWAY_AUTH_TOKEN
 export ADO_ORG
 export TS_AUTHKEY
 
-# Validate TS_AUTHKEY (required for the tailscale sidecar to come up).
-# Run this after getopts so teardown flags (-k/-r/-x) work without a key set.
-if [[ -z "$TS_AUTHKEY" || "$TS_AUTHKEY" == "tskey-auth-..." ]]; then
-    echo "Error: TS_AUTHKEY not set - the tailscale sidecar cannot start."
-    echo "  Generate a key at https://login.tailscale.com/admin/settings/keys"
-    echo "  and set TS_AUTHKEY in .settings (see settings.example)."
-    exit 1
-fi
-
 # Set up compose files
 COMPOSE_FILES="-f docker-compose.yml"
+
+# If TS_AUTHKEY is not set, run the tailscale sidecar in passive mode
+# (no tailnet, just holds the netns so dev gets normal docker bridge networking).
+# Run this after getopts so teardown flags (-k/-r/-x) are unaffected.
+if [[ -z "$TS_AUTHKEY" || "$TS_AUTHKEY" == "tskey-auth-..." ]]; then
+    echo "Warning: TS_AUTHKEY not set - tailscale sidecar will run in passive mode."
+    echo "  No tailnet access; dev container has standard docker bridge networking."
+    echo "  To enable tailnet access, set TS_AUTHKEY in .settings (see settings.example)."
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.no-tailscale.yml"
+fi
 
 # Start host MCP gateway if not already running
 if ! curl -s http://localhost:8811/health > /dev/null 2>&1; then

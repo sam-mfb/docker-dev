@@ -6,7 +6,7 @@ Dockerfile and scripts to setup a linux dev environment pre-configured for using
 
 - Copy your `.gitconfig` file into the root of this repo (will not be committed to version control)
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
-- Copy `settings.example` to `.settings` and set `TS_AUTHKEY` (required — see [Tailscale](#tailscale) below). Optionally set `ADO_ORG` to enable the Azure DevOps MCP.
+- Copy `settings.example` to `.settings`. Set `TS_AUTHKEY` to enable tailnet access from the dev container (optional — without it the sidecar runs in passive mode; see [Tailscale](#tailscale) below). Set `ADO_ORG` to enable the Azure DevOps MCP.
 - Use `./run.sh` to build and run the dev container
 - On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
 
@@ -60,9 +60,11 @@ Generate a reusable, ephemeral auth key at <https://login.tailscale.com/admin/se
 TS_AUTHKEY="tskey-auth-..."
 ```
 
-`run.sh` validates this before bringing the stack up. Teardown flags (`-k`, `-r`, `-x`) work without a key set.
-
 The sidecar registers in your tailnet using `HOSTNAME` (default `sam-dev`) as its device name. Tailscale state persists in the `tailscale-state` named volume, so the device doesn't re-register on every run. `docker compose down -v` would wipe it.
+
+### Passive mode (no TS_AUTHKEY)
+
+If `TS_AUTHKEY` is unset or left as the placeholder, `run.sh` layers `docker-compose.no-tailscale.yml` over the base config. This swaps the sidecar's entrypoint for `sleep infinity` — tailscaled never starts, so there's no tailnet access and no MagicDNS for tailnet hosts. The container itself stays up to own the shared network namespace, so the dev container gets standard docker bridge networking (internet, host access, MCP gateway) exactly as it would without any sidecar. Add a `TS_AUTHKEY` later and re-run `./run.sh -k && ./run.sh` to enable tailnet access.
 
 ### Inbound is blocked (shields-up)
 
