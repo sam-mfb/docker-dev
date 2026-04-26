@@ -1,5 +1,5 @@
 # check=skip=SecretsUsedInArgOrEnv
-ARG OLLAMA_VERSION=0.20.5
+ARG OLLAMA_VERSION=0.21.2
 FROM ollama/ollama:${OLLAMA_VERSION} AS ollama-source
 
 FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
