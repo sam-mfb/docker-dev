@@ -54,6 +54,19 @@ NEED_OVERRIDE=false
 EXTRA_VOLUMES=""
 MOUNT_HOME=""
 COMPOSE_FILES=""
+USE_TAILSCALE=false
+TAILSCALE_COMPOSE_FILE="docker-compose.tailscale.yml"
+
+# Pick the right compose file for teardown based on whether the tailscale
+# sidecar container exists, so -k/-x clean up correctly regardless of how
+# the stack was started.
+teardown_compose_files() {
+    if docker ps -a --filter "name=^${CONTAINER_NAME}-ts$" --format '{{.Names}}' | grep -q .; then
+        echo "-f $TAILSCALE_COMPOSE_FILE"
+    else
+        echo "-f docker-compose.yml"
+    fi
+}
 
 # Check for DOCKER_VOLUMES environment variable
 if [[ -n "$DOCKER_VOLUMES" ]]; then
@@ -65,11 +78,11 @@ if [[ -n "$DOCKER_VOLUMES" ]]; then
     echo "Will mount additional volumes: $DOCKER_VOLUMES"
 fi
 
-while getopts ":krxbhm:" option; do
+while getopts ":krxbthm:" option; do
     case $option in
         k)
             echo "Stopping and removing containers..."
-            docker compose down
+            docker compose $(teardown_compose_files) down
             # Kill any host MCP gateway process
             pkill -f "docker mcp gateway" 2>/dev/null || true
             exit;;
@@ -79,7 +92,7 @@ while getopts ":krxbhm:" option; do
             exit;;
         x)
             echo "Stopping containers and deleting image..."
-            docker compose down
+            docker compose $(teardown_compose_files) down
             # Kill any host MCP gateway process
             pkill -f "docker mcp gateway" 2>/dev/null || true
             docker rmi ${IMAGE_TAG}
@@ -87,6 +100,9 @@ while getopts ":krxbhm:" option; do
         b)
             BUILD_FLAGS="--no-cache --pull"
             FORCE_BUILD=true
+            ;;
+        t)
+            USE_TAILSCALE=true
             ;;
         h)
             NEED_OVERRIDE=true
@@ -116,17 +132,19 @@ export MCP_GATEWAY_AUTH_TOKEN
 export ADO_ORG
 export TS_AUTHKEY
 
-# Set up compose files
-COMPOSE_FILES="-f docker-compose.yml"
-
-# If TS_AUTHKEY is not set, run the tailscale sidecar in passive mode
-# (no tailnet, just holds the netns so dev gets normal docker bridge networking).
-# Run this after getopts so teardown flags (-k/-r/-x) are unaffected.
-if [[ -z "$TS_AUTHKEY" || "$TS_AUTHKEY" == "tskey-auth-..." ]]; then
-    echo "Warning: TS_AUTHKEY not set - tailscale sidecar will run in passive mode."
-    echo "  No tailnet access; dev container has standard docker bridge networking."
-    echo "  To enable tailnet access, set TS_AUTHKEY in .settings (see settings.example)."
-    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.no-tailscale.yml"
+# Set up compose files. Default is a single dev container with standard
+# docker bridge networking. Pass -t to opt into the tailscale sidecar.
+if [[ "$USE_TAILSCALE" == true ]]; then
+    if [[ -z "$TS_AUTHKEY" || "$TS_AUTHKEY" == "tskey-auth-..." ]]; then
+        echo "Error: -t requires TS_AUTHKEY to be set in .settings."
+        echo "  Generate one at https://login.tailscale.com/admin/settings/keys"
+        echo "  See settings.example. Omit -t to run without the sidecar."
+        exit 1
+    fi
+    COMPOSE_FILES="-f $TAILSCALE_COMPOSE_FILE"
+    echo "Tailscale sidecar enabled."
+else
+    COMPOSE_FILES="-f docker-compose.yml"
 fi
 
 # Start host MCP gateway if not already running
