@@ -1,32 +1,8 @@
 services:
-  tailscale:
-    image: tailscale/tailscale:latest
-    container_name: ${CONTAINER_NAME:-sam-dev-container-active}-ts
-    hostname: ${HOSTNAME:-sam-dev}
-    environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}
-      - TS_HOSTNAME=${HOSTNAME:-sam-dev}
-      - TS_USERSPACE=false
-      - TS_STATE_DIR=/var/lib/tailscale
-      - TS_EXTRA_ARGS=--shields-up --accept-dns=true
-    volumes:
-      - tailscale-state:/var/lib/tailscale
-      - /dev/net/tun:/dev/net/tun
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    ports:
-      - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
-      - "${HOST_PORT_RANGE:-3010-3019}:${CONTAINER_PORT_RANGE:-3010-3019}"
-      - "${NOVNC_HOST_PORT:-6080}:6080"
-    restart: unless-stopped
-
   dev:
     image: ${IMAGE_TAG:-sam-dev-container}
     container_name: ${CONTAINER_NAME:-sam-dev-container-active}
-    network_mode: "service:tailscale"
-    depends_on:
-      - tailscale
+    hostname: ${HOSTNAME:-sam-dev}
     shm_size: 2gb
     environment:
       - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN}
@@ -34,10 +10,11 @@ services:
       - ENABLE_CLAUDEAI_MCP_SERVERS=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
+      - "${HOST_PORT_RANGE:-3010-3019}:${CONTAINER_PORT_RANGE:-3010-3019}"
+      - "${NOVNC_HOST_PORT:-6080}:6080"
     security_opt:
       - seccomp=custom-seccomp.json
     stdin_open: true
     tty: true
-
-volumes:
-  tailscale-state:

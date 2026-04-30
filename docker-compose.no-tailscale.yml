@@ -1,9 +1,0 @@
-services:
-  tailscale:
-    entrypoint:
-      - sh
-      - -c
-      - |
-        echo "Tailscale disabled (TS_AUTHKEY not set in .settings)."
-        echo "Sidecar is providing docker bridge networking only - no tailnet access."
-        exec sleep infinity

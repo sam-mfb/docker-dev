@@ -5,8 +5,10 @@
 # Azure DevOps organization name (the part after dev.azure.com/)
 ADO_ORG="your-org-name"
 
-# Tailscale auth key for the sidecar (https://login.tailscale.com/admin/settings/keys)
-# A reusable, ephemeral key is recommended. The container registers in your
+# Tailscale auth key for the optional sidecar (https://login.tailscale.com/admin/settings/keys)
+# Only needed if you run with `./run.sh -t`. The default setup is a single
+# container with standard docker bridge networking (no sidecar).
+# A reusable, ephemeral key is recommended. The sidecar registers in your
 # tailnet using HOSTNAME as its device name and runs in shields-up mode, so it
 # can dial peers via MagicDNS but peers cannot dial it.
 TS_AUTHKEY="tskey-auth-..."
