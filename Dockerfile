@@ -18,7 +18,7 @@ RUN yes | unminimize
 # Add Git PPA for latest stable version
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools ssh sqlite3 sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables xvfb x11vnc novnc websockify autocutsel
+RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools python3-pip python3-venv pipx ssh sqlite3 postgresql-client sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables xvfb x11vnc novnc websockify autocutsel iputils-ping dnsutils traceroute mtr-tiny netcat-openbsd net-tools telnet tcpdump
 
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -88,6 +88,10 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/home/devuser/.cargo/bin:${PATH}"
 # Install rust-analyzer component
 RUN rustup component add rust-analyzer
+
+# Install uv (fast Python package/project manager from Astral)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN /home/devuser/.local/bin/uv --version
 
 ## install git credential forwarder
 RUN npm install -g git-credential-forwarder@latest
