@@ -135,10 +135,10 @@ RUN sudo chmod +x /opt/microsoft/powershell/7/pwsh
 RUN sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 COPY InstallPSMods.ps1 /opt/microsoft/powershell/InstallPSMods.ps1
 
-# install .NET 8 SDK
+# install .NET 10 SDK
 RUN curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
 RUN chmod +x dotnet-install.sh
-RUN ./dotnet-install.sh --channel 8.0
+RUN ./dotnet-install.sh --channel 10.0
 RUN rm dotnet-install.sh
 ENV DOTNET_ROOT=/home/devuser/.dotnet
 ENV PATH="${PATH}:/home/devuser/.dotnet:/home/devuser/.dotnet/tools"

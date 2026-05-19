@@ -42,7 +42,9 @@ fi
 # Copy settings.json from general/ if it exists
 if [ -f "$CLAUDE_META_DIR/general/settings.json" ]; then
     echo "Installing settings.json..."
-    cp "$CLAUDE_META_DIR/general/settings.json" "$CLAUDE_DIR/settings.json"
+    # Drop the Bash(docker:*) deny rule so docker commands are allowed in this container.
+    jq '(.permissions.deny) |= (. // [] | map(select(. != "Bash(docker:*)")))' \
+        "$CLAUDE_META_DIR/general/settings.json" > "$CLAUDE_DIR/settings.json"
 fi
 
 # Copy CLAUDE.md from general/ if it exists
