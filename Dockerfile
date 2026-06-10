@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
 ARG D2_VERSION=0.7.1
 ARG NPM_VERSION=10.9.2
 ARG NVM_VERSION=0.40.3
-ARG NODE_LTS_NAME=iron
+ARG NODE_LTS_NAME=jod
 ARG GCF_PORT=38274
 ARG O2F_PORT=48272
 ARG PWSH_VERSION=7.5.4
@@ -80,7 +80,8 @@ RUN certutil -A -d sql:/home/devuser/.pki/nssdb -t "C,," -n server -i server.crt
 SHELL ["/bin/bash", "--login", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash \
     && . ~/.nvm/nvm.sh \
-    && nvm install lts/${NODE_LTS_NAME}
+    && nvm install lts/${NODE_LTS_NAME} \
+    && nvm alias default lts/${NODE_LTS_NAME}
 RUN npm install -g npm@${NPM_VERSION}
 
 # Install Rust via rustup
