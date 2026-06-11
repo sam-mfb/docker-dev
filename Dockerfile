@@ -51,6 +51,10 @@ RUN mkdir -p /host-mnt
 RUN useradd -ms /bin/bash -u 1002 -G sudo devuser
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 RUN echo 'Defaults env_keep += "http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY"' >> /etc/sudoers
+# Create /workspace mount point owned by devuser. When an empty named volume is
+# mounted here, Docker seeds it from this dir, so /workspace comes up
+# devuser-owned without a runtime chown. See workspace.sh / docker-compose*.yml.
+RUN mkdir -p /workspace && chown devuser:devuser /workspace
 WORKDIR /home/devuser
 USER devuser
 ENV TERM="xterm-256color"

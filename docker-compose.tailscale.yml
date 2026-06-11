@@ -35,6 +35,7 @@ services:
       - ENABLE_CLAUDEAI_MCP_SERVERS=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - dev-workspace:/workspace
     security_opt:
       - seccomp=custom-seccomp.json
     stdin_open: true
@@ -42,3 +43,10 @@ services:
 
 volumes:
   tailscale-state:
+  # Shared with docker-compose.yml so the dev workspace persists whether or not
+  # the tailscale sidecar is in use. `name:` pins a stable, unprefixed name so
+  # both compose files and workspace.sh resolve to the same volume.
+  dev-workspace:
+    name: dev-workspace
+    labels:
+      com.docker-dev.workspace: "dev"
