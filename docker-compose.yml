@@ -10,6 +10,7 @@ services:
       - ENABLE_CLAUDEAI_MCP_SERVERS=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - dev-workspace:/workspace
     ports:
       - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"
       - "${HOST_PORT_RANGE:-3010-3019}:${CONTAINER_PORT_RANGE:-3010-3019}"
@@ -18,3 +19,12 @@ services:
       - seccomp=custom-seccomp.json
     stdin_open: true
     tty: true
+
+volumes:
+  # Persistent /workspace for the dev stack. Survives container recreation.
+  # Managed out-of-band by workspace.sh. `name:` pins a stable, unprefixed
+  # volume name so it matches workspace.sh regardless of compose project name.
+  dev-workspace:
+    name: dev-workspace
+    labels:
+      com.docker-dev.workspace: "dev"

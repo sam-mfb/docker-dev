@@ -29,6 +29,47 @@ Host (Docker Desktop)
 
 Pass `-t` to `run.sh` to opt into a Tailscale sidecar that owns the dev container's network namespace and provides outbound tailnet access. See [Tailscale](#tailscale) for details and trade-offs.
 
+## Workspace Volume
+
+Every container mounts a persistent `/workspace` directory at its root, owned by `devuser`. This is a normal Docker named volume (local driver — performant, not a bind mount) that **survives container recreation**: `docker compose down`/`up`, image rebuilds, and host reboots all leave it intact. Use it for code and data you want to keep between sessions; the rest of the container filesystem is disposable.
+
+Each stack gets its own volume so they stay independent:
+
+| Stack | Started by | Volume |
+| --- | --- | --- |
+| dev (plain + tailscale) | `run.sh` | `dev-workspace` |
+| experimental / YOLO | `run-exp.sh` | `exp-workspace` |
+
+The dev and tailscale stacks share `dev-workspace`, so your work is there whether or not you run with `-t`. The experimental container has a separate `exp-workspace`, so the isolated YOLO container can't touch your dev work.
+
+The volumes are declared in the compose files, so `run.sh` / `run-exp.sh` create them automatically on first start — there's nothing to set up. Ownership is handled automatically: Docker seeds a fresh volume from the image's `devuser`-owned `/workspace`, so `/workspace` comes up writable by `devuser` without any manual `chown`.
+
+### Managing the volume (`workspace.sh`)
+
+`workspace.sh` manages the volumes out-of-band. The first argument is the target stack (`dev`, the default, or `exp`):
+
+```bash
+./workspace.sh status [dev|exp]                 # mountpoint, disk usage, consumers
+./workspace.sh list                             # all workspace volumes
+./workspace.sh create   [dev|exp]               # create if missing (idempotent)
+./workspace.sh backup   [dev|exp] <file.tar.gz> # archive contents to a tarball
+./workspace.sh restore  [dev|exp] <file.tar.gz> # restore a tarball into the volume
+./workspace.sh delete   [dev|exp]               # remove the volume and all its data
+./workspace.sh recreate [dev|exp]               # delete + create an empty volume
+```
+
+Add `-y` / `--yes` to skip confirmation prompts. Destructive commands (`delete`, `recreate`, `restore`) refuse to run while a container is using the volume — stop it first with `./run.sh -k` or `./run-exp.sh -k`. Back up before you recreate:
+
+```bash
+./workspace.sh backup dev ~/dev-workspace.tar.gz   # snapshot first
+./workspace.sh recreate dev                        # start fresh
+./workspace.sh restore dev ~/dev-workspace.tar.gz  # …or roll back
+```
+
+`status`/`backup`/`restore` run a throwaway `alpine:3.19` container to read the volume; override the image with `WORKSPACE_HELPER_IMAGE` if needed.
+
+> Note: this is a plain named volume, so its size is not capped — `du`-style usage is reported by `status`, but writes are bounded only by host disk space.
+
 ### Docker Access via Claude
 
 Inside the container, Claude has access to Docker through MCP servers:

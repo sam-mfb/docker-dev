@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Ensure the /workspace named volume is owned by devuser. Normally Docker seeds
+# a fresh volume from the image's devuser-owned /workspace, but a volume
+# pre-created by workspace.sh comes up root-owned -- fix the top level here.
+if [ -d /workspace ] && [ "$(stat -c %u /workspace 2>/dev/null)" != "1002" ]; then
+    sudo chown devuser:devuser /workspace 2>/dev/null || true
+fi
+
 # Start Xvfb on display :99
 Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
 

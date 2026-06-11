@@ -52,6 +52,8 @@ services:
       - ADO_ORG=${ADO_ORG}
     security_opt:
       - seccomp=custom-seccomp.json
+    volumes:
+      - exp-workspace:/workspace
     depends_on:
       proxy:
         condition: service_healthy
@@ -62,6 +64,18 @@ services:
         sudo git config --system --unset-all credential.helper 2>/dev/null || true
         git config --global --unset-all credential.helper 2>/dev/null || true
         git config --global --unset credential.https://dev.azure.com.useHttpPath 2>/dev/null || true
+        # Ensure /workspace is owned by devuser (exp overrides the image
+        # entrypoint, so it can't rely on entrypoint.sh's safety chown).
+        sudo chown devuser:devuser /workspace 2>/dev/null || true
         exec sleep infinity
     stdin_open: true
     tty: true
+
+volumes:
+  # Persistent /workspace for the experimental stack. Separate from the dev
+  # stack so the isolated YOLO container can't touch dev work. `name:` pins a
+  # stable, unprefixed name matching workspace.sh.
+  exp-workspace:
+    name: exp-workspace
+    labels:
+      com.docker-dev.workspace: "exp"
