@@ -1,17 +1,17 @@
 # check=skip=SecretsUsedInArgOrEnv
-ARG OLLAMA_VERSION=0.30.0
+ARG OLLAMA_VERSION=0.30.8
 FROM ollama/ollama:${OLLAMA_VERSION} AS ollama-source
 
 FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
 
 ARG D2_VERSION=0.7.1
-ARG NPM_VERSION=10.9.2
-ARG NVM_VERSION=0.40.3
+ARG NPM_VERSION=11.17.0
+ARG NVM_VERSION=0.40.5
 ARG NODE_LTS_NAME=jod
 ARG GCF_PORT=38274
 ARG O2F_PORT=48272
-ARG PWSH_VERSION=7.5.4
-ARG DOCKER_COMPOSE_VERSION=5.0.1
+ARG PWSH_VERSION=7.6.2
+ARG DOCKER_COMPOSE_VERSION=5.1.4
 
 RUN yes | unminimize
 
@@ -201,7 +201,7 @@ CMD ["bash"]
 # Lightweight alpine container that bridges internal and external networks,
 # providing controlled egress via tinyproxy (HTTP/S), socat (OAuth2 TCP),
 # and dnsmasq (DNS). Its own iptables restrict host access to port 48272 + DNS.
-FROM alpine:3.19 AS exp-proxy
+FROM alpine:3.24 AS exp-proxy
 RUN apk add --no-cache tinyproxy socat dnsmasq iptables ip6tables bash
 COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
 COPY entrypoint-proxy.sh /entrypoint-proxy.sh
