@@ -168,8 +168,8 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 ENV PATH="/home/devuser/.local/bin:${PATH}"
 RUN claude --version || { echo "FATAL: Claude Code failed to install"; exit 1; }
 
-# install Claude agents and skills from claude-meta repo
-# run update-claude-meta.sh inside the container to get updated versions
+# install the claude-meta plugin (skills + agents) and global Claude settings
+# re-run update-claude-meta.sh inside the container to pick up updates
 COPY update-claude-meta.sh ./update-claude-meta.sh
 RUN sudo chmod 755 ./update-claude-meta.sh
 RUN ./update-claude-meta.sh
