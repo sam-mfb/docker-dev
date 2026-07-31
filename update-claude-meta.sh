@@ -43,9 +43,22 @@ else
     git clone --depth 1 "https://github.com/${MARKETPLACE_REPO}.git" "$CLAUDE_META_DIR"
 fi
 
+# settings.json is co-owned: claude-meta owns the hand-authored keys, but the
+# CLI stores plugin and marketplace registration in this same file, under
+# enabledPlugins and extraKnownMarketplaces. Overwrite the former and carry the
+# latter across, or the copy silently disables every installed plugin.
+PRESERVE_KEYS='{enabledPlugins, extraKnownMarketplaces}'
+
 if [ -f "$CLAUDE_META_DIR/general/settings.json" ]; then
     echo "Installing settings.json..."
-    cp "$CLAUDE_META_DIR/general/settings.json" "$CLAUDE_DIR/settings.json"
+    if [ -f "$CLAUDE_DIR/settings.json" ] && command -v jq >/dev/null 2>&1; then
+        jq -s ".[1] + (.[0] | $PRESERVE_KEYS | with_entries(select(.value != null)))" \
+            "$CLAUDE_DIR/settings.json" "$CLAUDE_META_DIR/general/settings.json" \
+            > "$CLAUDE_DIR/settings.json.tmp" \
+            && mv "$CLAUDE_DIR/settings.json.tmp" "$CLAUDE_DIR/settings.json"
+    else
+        cp "$CLAUDE_META_DIR/general/settings.json" "$CLAUDE_DIR/settings.json"
+    fi
 fi
 
 # Global memory. Unlike settings.json this is skipped when the repo's copy is
@@ -72,7 +85,12 @@ fi
 
 # --- Plugin (skills + agents) ------------------------------------------------
 
-if claude plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE_NAME"; then
+# Decide add-vs-update from the marketplace declaration in settings.json rather
+# than from `marketplace list`, which also reports marketplaces known only from
+# the ~/.claude/plugins cache. Taking the update path off a cache hit leaves
+# extraKnownMarketplaces undeclared.
+if jq -e --arg n "$MARKETPLACE_NAME" '.extraKnownMarketplaces[$n]' \
+        "$CLAUDE_DIR/settings.json" >/dev/null 2>&1; then
     echo "Updating marketplace $MARKETPLACE_NAME..."
     claude plugin marketplace update "$MARKETPLACE_NAME"
 else
@@ -80,11 +98,12 @@ else
     claude plugin marketplace add "$MARKETPLACE_REPO" --scope user
 fi
 
-if claude plugin list 2>/dev/null | grep -q "$PLUGIN_NAME"; then
-    echo "Updating plugin $PLUGIN_NAME..."
-    claude plugin update "$PLUGIN_NAME"
-else
-    echo "Installing plugin $PLUGIN_NAME..."
+# `plugin update` needs the fully qualified name@marketplace form; the bare
+# plugin name fails with "not found" even when the plugin is installed. The
+# install fallback covers the not-yet-installed case and is itself idempotent.
+echo "Updating plugin ${PLUGIN_NAME}@${MARKETPLACE_NAME}..."
+if ! claude plugin update "${PLUGIN_NAME}@${MARKETPLACE_NAME}"; then
+    echo "Not installed; installing..."
     claude plugin install "${PLUGIN_NAME}@${MARKETPLACE_NAME}" --scope user
 fi
 
