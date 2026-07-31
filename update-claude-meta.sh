@@ -48,6 +48,15 @@ if [ -f "$CLAUDE_META_DIR/general/settings.json" ]; then
     cp "$CLAUDE_META_DIR/general/settings.json" "$CLAUDE_DIR/settings.json"
 fi
 
+# Global memory. Unlike settings.json this is skipped when the repo's copy is
+# missing or empty (-s tests both), so an unused placeholder can't blank an
+# existing ~/.claude/CLAUDE.md. The tradeoff: deleting it upstream will not
+# uninstall a copy already in place — remove that by hand.
+if [ -s "$CLAUDE_META_DIR/general/CLAUDE.md" ]; then
+    echo "Installing CLAUDE.md..."
+    cp "$CLAUDE_META_DIR/general/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+fi
+
 # Skip the first-run wizard in a fresh container. ~/.claude.json also holds
 # auth, per-project history, and caches, so merge these two keys rather than
 # replacing the file.
