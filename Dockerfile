@@ -1,5 +1,5 @@
 # check=skip=SecretsUsedInArgOrEnv
-ARG OLLAMA_VERSION=0.33.3
+ARG OLLAMA_VERSION=0.34.4
 FROM ollama/ollama:${OLLAMA_VERSION} AS ollama-source
 
 FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
@@ -12,13 +12,16 @@ ARG GCF_PORT=38274
 ARG O2F_PORT=48272
 ARG PWSH_VERSION=7.6.2
 ARG DOCKER_COMPOSE_VERSION=5.1.4
+# Pinned: rush 5.179.0 depends on @rushstack/node-core-library@5.24.1, which was
+# never published to npm (registry only has up to 5.24.0), breaking the build.
+ARG RUSH_VERSION=5.178.0
 
 RUN yes | unminimize
 
 # Add Git PPA for latest stable version
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools python3-pip python3-venv pipx ssh sqlite3 postgresql-client sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq iptables xvfb x11vnc novnc websockify autocutsel iputils-ping dnsutils traceroute mtr-tiny netcat-openbsd net-tools telnet tcpdump
+RUN apt-get update && apt-get -y install nano vim-gtk3 xclip tmux git fzf ripgrep curl python3 python3-setuptools python3-pip python3-venv pipx ssh sqlite3 postgresql-client sudo locales ca-certificates gnupg lsb-release libnss3-tools upower uuid-runtime build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev dbus-x11 libsecret-1-0 libsecret-1-dev libsecret-tools gnome-keyring xdg-utils gstreamer1.0-gl gstreamer1.0-plugins-ugly jq bubblewrap iptables xvfb x11vnc novnc websockify autocutsel iputils-ping dnsutils traceroute mtr-tiny netcat-openbsd net-tools telnet tcpdump
 
 # Install docker cli
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
@@ -178,6 +181,12 @@ RUN ./update-claude-meta.sh
 RUN npm install -g @google/gemini-cli@latest
 
 # install Codex
+# Codex's default Linux sandbox is bubblewrap; it probes the hardcoded path
+# /usr/bin/bwrap and falls back to a vendored copy (with a startup warning) if
+# absent. The distro `bubblewrap` package installed above puts it there. This
+# also needs `pivot_root` in custom-seccomp.json -- see the Bubblewrap section
+# of README.md for the known runtime failure modes and the
+# `use_legacy_landlock` escape hatch.
 RUN npm i -g @openai/codex@latest
 
 # Install ollama CLI from official Docker image (client only — connects to
@@ -185,7 +194,7 @@ RUN npm i -g @openai/codex@latest
 COPY --from=ollama-source /bin/ollama /usr/bin/ollama
 ENV OLLAMA_HOST=http://host.docker.internal:11434
 
-RUN npm install -g @microsoft/rush
+RUN npm install -g @microsoft/rush@${RUSH_VERSION}
 
 # Xvfb + noVNC display configuration (placed last so DISPLAY is unset during
 # build RUN steps, preventing bashrc from starting the VNC stack mid-build)

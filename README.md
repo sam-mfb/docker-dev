@@ -292,8 +292,34 @@ Using the chrome.js seccomp profile, with the following modifications:
     - added 'faccesssat2' to allow tmux to create streams
     - added 'rseq' and 'close_range" to allow WebKit gtk browser to run
     - added 'clone3' to allow pthread creation on Windows
+    - added 'pivot_root' to allow bubblewrap (codex's Linux sandbox) to set up
+      its mount namespace
 
 (can run strace -c to see what other syscalls are in use)
+
+### Bubblewrap / codex sandboxing
+
+Codex uses bubblewrap (`bwrap`) as its default Linux sandbox as of the Rust
+rewrite; Landlock is now only a fallback. It probes the hardcoded path
+`/usr/bin/bwrap`, warns `⚠ Codex could not find system bubblewrap at
+/usr/bin/bwrap` if absent, and falls back to a vendored copy. We install the
+distro `bubblewrap` package so it finds the system binary there.
+
+Note there is no npm/nvm route for this: the npm package named `bubblewrap` is
+an unrelated ES6-proxy library, and `@bubblewrap/cli` is Google's Trusted Web
+Activity generator. Neither is the sandbox.
+
+Beyond `pivot_root`, bwrap's other syscall needs (`clone`, `clone3`, `unshare`,
+`setns`, `mount`, `umount2`, `capset`, `setgroups`) were already allowed, and
+the socket syscalls are unfiltered, so the netlink path used by `--unshare-net`
+is fine. Known runtime failure modes in constrained containers, if it does
+break:
+
+    - `bwrap: Failed RTM_NEWADDR` (openai/codex#17337)
+    - `bwrap: Failed to make / slave` (openai/codex#15434)
+    - unprivileged user namespaces blocked by the host kernel
+
+The escape hatch for all of these is `codex -c use_legacy_landlock=true`.
 
 ## Chromium
 
