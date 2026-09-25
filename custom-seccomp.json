@@ -917,6 +917,11 @@
       "args": null
     },
     {
+      "name": "pivot_root",
+      "action": "SCMP_ACT_ALLOW",
+      "args": null
+    },
+    {
       "name": "poll",
       "action": "SCMP_ACT_ALLOW",
       "args": null
