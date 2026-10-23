@@ -177,8 +177,11 @@ COPY update-claude-meta.sh ./update-claude-meta.sh
 RUN sudo chmod 755 ./update-claude-meta.sh
 RUN ./update-claude-meta.sh
 
-# install Gemini CLI
-RUN npm install -g @google/gemini-cli@latest
+# install Antigravity CLI (`agy`, successor to Gemini CLI)
+# Installs a native binary to ~/.local/bin (already on PATH above); it
+# self-updates in the background at runtime.
+RUN curl -fsSL https://antigravity.google/cli/install.sh | bash
+RUN command -v agy || { echo "FATAL: Antigravity CLI failed to install"; exit 1; }
 
 # install Codex
 # Codex's default Linux sandbox is bubblewrap; it probes the hardcoded path
