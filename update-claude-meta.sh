@@ -91,6 +91,11 @@ fi
 # extraKnownMarketplaces undeclared.
 if jq -e --arg n "$MARKETPLACE_NAME" '.extraKnownMarketplaces[$n]' \
         "$CLAUDE_DIR/settings.json" >/dev/null 2>&1; then
+    # `marketplace update` starts by renaming its cached clone. When this runs
+    # in a container and the clone was made during the image build, the clone
+    # sits in a read-only overlayfs layer, and the rename fails with EXDEV.
+    # The clone holds no local state, so delete it and let the update re-clone.
+    rm -rf "$CLAUDE_DIR/plugins/marketplaces/$MARKETPLACE_NAME"
     echo "Updating marketplace $MARKETPLACE_NAME..."
     claude plugin marketplace update "$MARKETPLACE_NAME"
 else
