@@ -183,6 +183,13 @@ RUN ./update-claude-meta.sh
 RUN curl -fsSL https://antigravity.google/cli/install.sh | bash
 RUN command -v agy || { echo "FATAL: Antigravity CLI failed to install"; exit 1; }
 
+# install opencode
+# Installs to ~/.opencode/bin, which the installer only adds to shell rc files,
+# so put it on PATH explicitly for later layers and non-login shells.
+RUN curl -fsSL https://opencode.ai/install | bash
+ENV PATH="/home/devuser/.opencode/bin:${PATH}"
+RUN opencode --version || { echo "FATAL: opencode failed to install"; exit 1; }
+
 # install Codex
 # Codex's default Linux sandbox is bubblewrap; it probes the hardcoded path
 # /usr/bin/bwrap and falls back to a vendored copy (with a startup warning) if
