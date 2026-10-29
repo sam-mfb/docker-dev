@@ -30,7 +30,6 @@ services:
       - tailscale
     shm_size: 2gb
     environment:
-      - MCP_GATEWAY_AUTH_TOKEN=${MCP_GATEWAY_AUTH_TOKEN}
       - ADO_ORG=${ADO_ORG}
       - ENABLE_CLAUDEAI_MCP_SERVERS=false
     volumes:

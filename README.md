@@ -12,19 +12,13 @@ Dockerfile and scripts to setup a linux dev environment pre-configured for using
 
 ## Architecture
 
-By default the dev environment runs a single container with standard docker bridge networking, plus an MCP gateway started on the host by `run.sh`:
-
-1. **MCP Gateway** (host process) - Provides Docker access to Claude via MCP servers, listening on `localhost:8811`
-2. **Dev Container** (`dev`) - The development environment with vim, Claude Code, etc.; ports published directly to the host (3002, 3010-3019, 6080)
+By default the dev environment runs a single container (`dev`) with standard docker bridge networking: the development environment with vim, Claude Code, etc.; ports published directly to the host (3002, 3010-3019, 6080).
 
 ```
 Host (Docker Desktop)
-├── MCP Gateway (host process on :8811)
-│
 └── Dev Container
     ├── Standard docker bridge networking
-    ├── Publishes ports to the host (3002, 3010-3019, 6080)
-    └── Claude Code (connects to gateway via MCP)
+    └── Publishes ports to the host (3002, 3010-3019, 6080)
 ```
 
 Pass `-t` to `run.sh` to opt into a Tailscale sidecar that owns the dev container's network namespace and provides outbound tailnet access. See [Tailscale](#tailscale) for details and trade-offs.
@@ -70,20 +64,9 @@ Add `-y` / `--yes` to skip confirmation prompts. Destructive commands (`delete`,
 
 > Note: this is a plain named volume, so its size is not capped — `du`-style usage is reported by `status`, but writes are bounded only by host disk space.
 
-### Docker Access via Claude
+### Docker Access
 
-Inside the container, Claude has access to Docker through MCP servers:
-
-- **docker** - Run Docker CLI commands
-- **dockerhub** - Search and manage Docker Hub images
-
-Use `/mcp` in Claude to verify the connection. Then ask Claude to run Docker commands like "list running containers" or "search Docker Hub for nginx images".
-
-### Docker Access outside of Claude
-
-The docker socket is also bound into the container. Claude will not use it (it will use the MCP), but you can use the docker cli directly.
-
-The host's .docker/mcp directory is mounted as well which allows you to use `docker mcp` commands to configure the gateway from inside the container. Note any secrets that you set will saved on your host.
+The docker socket is bound into the container, so you (and Claude) can use the docker cli directly.
 
 ## Tailscale
 
@@ -93,15 +76,12 @@ When enabled with `-t`, the `tailscale` sidecar gives the dev container outbound
 
 ```
 Host (Docker Desktop)
-├── MCP Gateway (host process on :8811)
-│
 ├── Tailscale Sidecar
 │   ├── Owns the shared network namespace
 │   ├── Publishes ports to the host (3002, 3010-3019, 6080)
 │   └── tailscale0 interface (shields-up: no inbound from peers)
 │
 └── Dev Container (network_mode: service:tailscale)
-    ├── Claude Code (connects to gateway via MCP)
     ├── Reaches tailnet peers by MagicDNS name
     └── Shares loopback + interfaces with the sidecar
 ```
@@ -142,7 +122,7 @@ If you ever run on an engine that doesn't expose `/dev/net/tun` (some Colima/Lim
 
 ## run.sh
 
-Uses `docker compose` to manage both the MCP gateway and dev container.
+Uses `docker compose` to manage the dev container.
 
 ### Usage
 
@@ -226,7 +206,6 @@ What's restricted vs the dev container:
 - No host volume mounts
 - No git credential forwarding (port 38274 is unreachable)
 - No X11 display
-- No MCP gateway
 
 ### Usage
 

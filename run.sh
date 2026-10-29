@@ -66,8 +66,6 @@ while getopts ":krxbthm:" option; do
         k)
             echo "Stopping and removing containers..."
             docker compose $(teardown_compose_files) down
-            # Kill any host MCP gateway process
-            pkill -f "docker mcp gateway" 2>/dev/null || true
             exit;;
         r)
             echo "Deleting image..."
@@ -76,8 +74,6 @@ while getopts ":krxbthm:" option; do
         x)
             echo "Stopping containers and deleting image..."
             docker compose $(teardown_compose_files) down
-            # Kill any host MCP gateway process
-            pkill -f "docker mcp gateway" 2>/dev/null || true
             docker rmi ${IMAGE_TAG}
             exit;;
         b)
@@ -102,16 +98,6 @@ while getopts ":krxbthm:" option; do
     esac
 done
 
-# Generate or load MCP gateway auth token
-MCP_TOKEN_FILE=".mcp-gateway-token"
-if [[ ! -f "$MCP_TOKEN_FILE" ]]; then
-    MCP_GATEWAY_AUTH_TOKEN=$(openssl rand -hex 16)
-    echo "$MCP_GATEWAY_AUTH_TOKEN" > "$MCP_TOKEN_FILE"
-    echo "Generated new MCP gateway auth token"
-else
-    MCP_GATEWAY_AUTH_TOKEN=$(cat "$MCP_TOKEN_FILE")
-fi
-export MCP_GATEWAY_AUTH_TOKEN
 export ADO_ORG
 export TS_AUTHKEY
 
@@ -128,23 +114,6 @@ if [[ "$USE_TAILSCALE" == true ]]; then
     echo "Tailscale sidecar enabled."
 else
     COMPOSE_FILES="-f docker-compose.yml"
-fi
-
-# Start host MCP gateway if not already running
-if ! curl -s http://localhost:8811/health > /dev/null 2>&1; then
-    echo "Starting Docker MCP gateway on host..."
-    MCP_GATEWAY_AUTH_TOKEN=$MCP_GATEWAY_AUTH_TOKEN docker mcp gateway run --port 8811 --transport streaming --secrets=docker-desktop > /dev/null 2>&1 &
-    MCP_PID=$!
-    # Wait for gateway to be ready
-    for i in {1..10}; do
-        if curl -s http://localhost:8811/health > /dev/null 2>&1; then
-            echo "MCP gateway started (PID: $MCP_PID)"
-            break
-        fi
-        sleep 1
-    done
-else
-    echo "MCP gateway already running on port 8811"
 fi
 
 # Build image if not built already or if -b flag was used
