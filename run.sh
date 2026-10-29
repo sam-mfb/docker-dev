@@ -15,23 +15,6 @@ if [[ -n "$ADO_ORG" && "$ADO_ORG" == "your-org-name" ]]; then
     unset ADO_ORG
 fi
 
-# Check for newer Ollama version (non-blocking)
-check_ollama_version() {
-    local pinned
-    pinned=$(grep -m1 '^ARG OLLAMA_VERSION=' Dockerfile 2>/dev/null | cut -d= -f2)
-    if [[ -z "$pinned" ]]; then return; fi
-    local latest
-    latest=$(curl -sfL -o /dev/null -w '%{url_effective}' https://github.com/ollama/ollama/releases/latest 2>/dev/null \
-        | sed -n 's/.*\/v\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
-    if [[ -n "$latest" && "$latest" != "$pinned" ]]; then
-        echo ""
-        echo "*** Ollama update available: $pinned -> $latest ***"
-        echo "    Update OLLAMA_VERSION in Dockerfile and rebuild to upgrade."
-        echo ""
-    fi
-}
-check_ollama_version &
-
 # Configuration
 IMAGE_TARGET="sam-dev"
 IMAGE_TAG="sam-dev-container"

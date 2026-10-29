@@ -1,7 +1,4 @@
 # check=skip=SecretsUsedInArgOrEnv
-ARG OLLAMA_VERSION=0.34.4
-FROM ollama/ollama:${OLLAMA_VERSION} AS ollama-source
-
 FROM mcr.microsoft.com/playwright:v1.45.3-noble AS sam-dev
 
 ARG D2_VERSION=0.7.1
@@ -199,11 +196,6 @@ RUN opencode --version || { echo "FATAL: opencode failed to install"; exit 1; }
 # `use_legacy_landlock` escape hatch.
 RUN npm i -g @openai/codex@latest
 
-# Install ollama CLI from official Docker image (client only — connects to
-# server on the host). Pinned version via the ollama-source build stage.
-COPY --from=ollama-source /bin/ollama /usr/bin/ollama
-ENV OLLAMA_HOST=http://host.docker.internal:11434
-
 RUN npm install -g @microsoft/rush@${RUSH_VERSION}
 
 # Xvfb + noVNC display configuration (placed last so DISPLAY is unset during
@@ -225,7 +217,4 @@ RUN apk add --no-cache tinyproxy socat dnsmasq iptables ip6tables bash
 COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
 COPY entrypoint-proxy.sh /entrypoint-proxy.sh
 RUN chmod 755 /entrypoint-proxy.sh
-# Install ollama CLI from official Docker image (client only)
-COPY --from=ollama-source /bin/ollama /usr/bin/ollama
-ENV OLLAMA_HOST=http://host.docker.internal:11434
 ENTRYPOINT ["/entrypoint-proxy.sh"]
