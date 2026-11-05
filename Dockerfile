@@ -187,6 +187,13 @@ RUN curl -fsSL https://opencode.ai/install | bash
 ENV PATH="/home/devuser/.opencode/bin:${PATH}"
 RUN opencode --version || { echo "FATAL: opencode failed to install"; exit 1; }
 
+# install kashkeshet (kkt) -- installed only, NOT set up; run `kkt setup`
+# (client-only) inside the container if you want to use it.
+# Installs to ~/.cargo/bin, already on PATH from the Rust step above.
+RUN curl -fsSL https://github.com/sam-mfb/kashkeshet/releases/latest/download/kashkeshet-installer.sh \
+    | KASHKESHET_NO_MODIFY_PATH=1 sh
+RUN kkt --version || { echo "FATAL: kashkeshet failed to install"; exit 1; }
+
 # install Codex
 # Codex's default Linux sandbox is bubblewrap; it probes the hardcoded path
 # /usr/bin/bwrap and falls back to a vendored copy (with a startup warning) if
