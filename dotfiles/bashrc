@@ -1,9 +1,16 @@
-source /etc/skel/.bashrc
+# docker-dev shell settings. Installed as ~/.docker-dev/bashrc and loaded from
+# the end of ~/.bashrc, so the base image's own bashrc still runs first.
+
+# Environment for installed tools (PATH, nvm, .NET, forwarders, ...).
+[ -f "$HOME/.docker-dev/env.sh" ] && . "$HOME/.docker-dev/env.sh"
+
+# The rest is for interactive shells only.
+case $- in *i*) ;; *) return ;; esac
 
 # Define our custom colors (for better readability)
 COLOR_HOST=220    # yellow
 COLOR_PATH=135    # teal
-COLOR_EXEC=10     # green 
+COLOR_EXEC=10     # green
 
 # Override the PS1 prompt with our custom colors
 PS1='${debian_chroot:+($debian_chroot)}\[\033[38;5;${COLOR_HOST}m\]\u@\h\[\033[00m\]:\[\033[38;5;${COLOR_PATH}m\]\w\[\033[00m\]\$ '
@@ -38,47 +45,16 @@ alias lsg='ls "$(git rev-parse --show-cdup)"'
 # if you are not a vim user you may want to comment this out
 set -o vi
 
-# give user control over docker.sock
-sudo chown devuser /var/run/docker.sock
-
-# git tab completion
-source ~/.git-completion.bash
+# git tab completion (ships with git)
+if ! complete -p git >/dev/null 2>&1 && [ -f /usr/share/bash-completion/completions/git ]; then
+    . /usr/share/bash-completion/completions/git
+fi
 
 # github cli auth alias
 alias gha='gh auth login --git-protocol https --web --clipboard'
 
-# Start Xvfb + noVNC stack (once) if not already running
-# DISPLAY is unset during docker build (ENV is placed after all RUN steps)
-if [[ -n "$DISPLAY" ]] && ! pgrep -x Xvfb > /dev/null 2>&1; then
-    Xvfb ${DISPLAY} -screen 0 ${VNC_RESOLUTION:-1280x1024x24} -ac +extension GLX +render -noreset &
-    for i in $(seq 1 50); do
-        xdpyinfo -display ${DISPLAY} > /dev/null 2>&1 && break
-        sleep 0.1
-    done
-    x11vnc -display ${DISPLAY} -forever -shared -rfbport ${VNC_PORT:-5900} -nopw &
-    sleep 0.5
-    websockify --web /usr/share/novnc ${NOVNC_PORT:-6080} localhost:${VNC_PORT:-5900} &
-    autocutsel &
-    autocutsel -selection PRIMARY &
-    echo "noVNC available at http://localhost:${NOVNC_PORT:-6080}/vnc.html"
-fi
-
-# setup dbus which is used by chrome and libsecret/gnome-keyring
-
-export NO_AT_BRIDGE=1 
-
-# don't start in tmux sessions
-if [[ -z $TMUX && -z $NO_DBUS_CONFIG ]]; then
-    sudo service dbus start
-    export XDG_RUNTIME_DIR=/run/user/1002
-    export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
-    dbus-daemon --session --address=$DBUS_SESSION_BUS_ADDRESS --nofork --nopidfile --syslog-only &
-    echo "Logging gnome-keyring-daemon messages to /tmp/gnome-keyring.log"
-
-    gnome-keyring-daemon --start --components=secrets &> /tmp/gnome-keyring.log
-fi
-
-# Claude Code YOLO mode alias (only available in the experimental container)
-if [[ -n "$EXP_CONTAINER" ]]; then
-    alias claude-yolo='ENABLE_CLAUDEAI_MCP_SERVERS=false claude --dangerously-skip-permissions'
-fi
+# Additions from individual install steps (docker socket, virtual display, ...).
+for _dd_f in "$HOME"/.docker-dev/bashrc.d/*.sh; do
+    [ -r "$_dd_f" ] && . "$_dd_f"
+done
+unset _dd_f

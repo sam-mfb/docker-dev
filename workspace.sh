@@ -9,7 +9,6 @@
 # delete, and recreate.
 #
 #   dev  -> dev-workspace  (run.sh; shared by the plain and tailscale stacks)
-#   exp  -> exp-workspace  (run-exp.sh)
 #
 # docker compose already auto-creates these on first `up`, so for normal use
 # you don't need this script at all -- it's for managing the volumes directly.
@@ -17,20 +16,18 @@
 set -euo pipefail
 
 LABEL_KEY="com.docker-dev.workspace"
-# Throwaway image used for du / tar over the volume. alpine:3.19 is already
-# cached by the exp-proxy build stage; override with WORKSPACE_HELPER_IMAGE if
-# you prefer a different small image.
+# Throwaway image used for du / tar over the volume; override with
+# WORKSPACE_HELPER_IMAGE if you prefer a different small image.
 HELPER_IMAGE="${WORKSPACE_HELPER_IMAGE:-alpine:3.19}"
 ASSUME_YES=false
 
 die() { echo "Error: $*" >&2; exit 1; }
 
-# Map a target name (dev|exp) to its volume name.
+# Map a target name to its volume name. dev is the only target.
 vol_for() {
     case "${1:-dev}" in
         dev) echo "dev-workspace" ;;
-        exp) echo "exp-workspace" ;;
-        *)   die "unknown target '$1' (expected: dev or exp)" ;;
+        *)   die "unknown target '$1' (expected: dev)" ;;
     esac
 }
 
@@ -49,7 +46,7 @@ require_not_in_use() {
     if [ -n "$running" ]; then
         echo "Volume '$vol' is in use by running container(s):" >&2
         echo "$running" | sed 's/^/  - /' >&2
-        die "stop them first (e.g. ./run.sh -k or ./run-exp.sh -k)"
+        die "stop them first (e.g. ./run.sh -k)"
     fi
 }
 
@@ -152,7 +149,6 @@ Usage: ./workspace.sh <command> [target] [args] [-y]
 
 Targets:
   dev   dev-workspace   (default; run.sh, plain + tailscale stacks)
-  exp   exp-workspace   (run-exp.sh)
 
 Commands:
   status   [target]                 show mountpoint, disk usage, and consumers
@@ -171,7 +167,7 @@ Notes:
   * Volumes are normal Docker named volumes (local driver) and persist across
     container recreation. docker compose also auto-creates them on first `up`.
   * Destructive commands refuse to run while a container is using the volume;
-    stop it first (./run.sh -k or ./run-exp.sh -k). Back up before recreate.
+    stop it first (./run.sh -k). Back up before recreate.
 EOF
 }
 

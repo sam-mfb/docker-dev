@@ -8,7 +8,6 @@ services:
       - ADO_ORG=${ADO_ORG}
       - ENABLE_CLAUDEAI_MCP_SERVERS=false
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - dev-workspace:/workspace
     ports:
       - "${HOST_PORTS:-3002}:${CONTAINER_PORTS:-3000}"

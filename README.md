@@ -4,8 +4,9 @@ Dockerfile and scripts to setup a linux dev environment pre-configured for using
 
 ## Setup
 
-- Copy your `.gitconfig` file into the root of this repo (will not be committed to version control)
+- Edit `dotfiles/gitconfig` to set your git name and email
 - Modify `dotfiles/bashrc` to your taste (e.g., remove vi mode if you aren't a vi user)
+- Adjust tool versions in `install/versions.env` if you need to (see [Install scripts](#install-scripts))
 - Copy `settings.example` to `.settings`. Set `ADO_ORG` to enable the Azure DevOps MCP. Set `TS_AUTHKEY` if you plan to opt into the tailscale sidecar (see [Tailscale](#tailscale) below); it is not required for the default single-container setup.
 - Use `./run.sh` to build and run the dev container
 - On WSL, it is helpful if your user and group guid is set to 1002 to match the devuser in these containers
@@ -23,6 +24,44 @@ Host (Docker Desktop)
 
 Pass `-t` to `run.sh` to opt into a Tailscale sidecar that owns the dev container's network namespace and provides outbound tailnet access. See [Tailscale](#tailscale) for details and trade-offs.
 
+The image starts from plain `ubuntu:24.04`. Almost everything in it is installed by the scripts in `install/`, described next; the Dockerfile only creates the user and calls them.
+
+## Install scripts
+
+`install/install.sh` installs the toolset. The Dockerfile uses it to build the image, and it also works inside a running container or on top of another image. It is split into small steps, one file each under `install/steps/<group>/`, so you can install all of it or only part.
+
+| Group | What it installs |
+| --- | --- |
+| base | core packages (curl, jq, sudo, ...), the en_US.UTF-8 locale, git |
+| terminal | vim, tmux, fzf, ripgrep, network and database clients; the dotfiles; vim plugins and coc |
+| languages | build tools and Python, node (nvm), Rust, uv, .NET, PowerShell, Rush |
+| docker | docker CLI, buildx, and compose (for use with a mounted host socket) |
+| cloud | GitHub CLI, Azure CLI and its DevOps extension |
+| desktop | virtual display with noVNC, dbus, gnome-keyring, the MFB root certificate, Playwright browsers |
+| forwarders | git credential and OAuth2 forwarder clients |
+| ai | Claude Code and the claude-meta plugin, codex, Antigravity CLI, opencode, kashkeshet |
+
+Run `install/install.sh --list` to see every step, which user it runs as, and what it depends on.
+
+How a run behaves:
+
+- **Already installed tools are skipped.** Each step first checks whether its tool is present at the version pinned in `install/versions.env`. If so, it does nothing. Dotfile steps compare the installed files with the repo's, so a rerun picks up dotfile edits.
+- **Every tool is pinned.** A pin is an exact version or `latest`. With `latest`, a present tool is left alone; use `--force` to upgrade it. A variable set in the environment overrides the file for one run, e.g. `CLAUDE_VERSION=2.1.0 install/install.sh --only claude`.
+- **Dependencies are added automatically.** Asking for `--only codex` also runs the `node` and `bubblewrap` steps (which skip if already done).
+- **Required and optional steps.** The base and terminal steps, and node, are required: if one fails the run stops. Other steps are optional: a failure is reported in the summary at the end and the run continues. `--strict` makes every failure stop the run. The Dockerfile builds with `--strict`.
+- **Root and user steps.** Run it as root, or as a user with passwordless sudo. Steps that install into a home directory run as the target user (`--user`, default: you).
+- **Your shell setup is added, not replaced.** Each tool's environment (PATH, nvm, `DOTNET_ROOT`, ...) goes in its own file in `~/.docker-dev/env.d/`. `dotfiles/bashrc` is installed as `~/.docker-dev/bashrc` and loaded from the end of your existing `~/.bashrc`. Git settings are included from `~/.docker-dev/gitconfig`. An existing file the installer has to replace (like `~/.tmux.conf`) is saved once as `<name>.pre-docker-dev`.
+
+Common uses inside the container:
+
+```bash
+install/install.sh --check                  # what is installed, at what version
+install/install.sh --only ai --force        # upgrade the AI tools
+install/install.sh --only claude-meta --force   # same as ~/update-claude-meta.sh
+```
+
+The image keeps a copy of the scripts in `/opt/docker-dev`, so `/opt/docker-dev/install/install.sh` works even without this repo checked out.
+
 ## Workspace Volume
 
 Every container mounts a persistent `/workspace` directory at its root, owned by `devuser`. This is a normal Docker named volume (local driver — performant, not a bind mount) that **survives container recreation**: `docker compose down`/`up`, image rebuilds, and host reboots all leave it intact. Use it for code and data you want to keep between sessions; the rest of the container filesystem is disposable.
@@ -32,27 +71,26 @@ Each stack gets its own volume so they stay independent:
 | Stack | Started by | Volume |
 | --- | --- | --- |
 | dev (plain + tailscale) | `run.sh` | `dev-workspace` |
-| experimental / YOLO | `run-exp.sh` | `exp-workspace` |
 
-The dev and tailscale stacks share `dev-workspace`, so your work is there whether or not you run with `-t`. The experimental container has a separate `exp-workspace`, so the isolated YOLO container can't touch your dev work.
+The dev and tailscale stacks share `dev-workspace`, so your work is there whether or not you run with `-t`.
 
-The volumes are declared in the compose files, so `run.sh` / `run-exp.sh` create them automatically on first start — there's nothing to set up. Ownership is handled automatically: Docker seeds a fresh volume from the image's `devuser`-owned `/workspace`, so `/workspace` comes up writable by `devuser` without any manual `chown`.
+The volumes are declared in the compose files, so `run.sh` creates them automatically on first start — there's nothing to set up. Ownership is handled automatically: Docker seeds a fresh volume from the image's `devuser`-owned `/workspace`, so `/workspace` comes up writable by `devuser` without any manual `chown`.
 
 ### Managing the volume (`workspace.sh`)
 
-`workspace.sh` manages the volumes out-of-band. The first argument is the target stack (`dev`, the default, or `exp`):
+`workspace.sh` manages the volumes out-of-band. The first argument is the target stack (`dev`, the default and only one):
 
 ```bash
-./workspace.sh status [dev|exp]                 # mountpoint, disk usage, consumers
+./workspace.sh status [dev]                     # mountpoint, disk usage, consumers
 ./workspace.sh list                             # all workspace volumes
-./workspace.sh create   [dev|exp]               # create if missing (idempotent)
-./workspace.sh backup   [dev|exp] <file.tar.gz> # archive contents to a tarball
-./workspace.sh restore  [dev|exp] <file.tar.gz> # restore a tarball into the volume
-./workspace.sh delete   [dev|exp]               # remove the volume and all its data
-./workspace.sh recreate [dev|exp]               # delete + create an empty volume
+./workspace.sh create   [dev]                   # create if missing (idempotent)
+./workspace.sh backup   [dev]     <file.tar.gz> # archive contents to a tarball
+./workspace.sh restore  [dev]     <file.tar.gz> # restore a tarball into the volume
+./workspace.sh delete   [dev]                   # remove the volume and all its data
+./workspace.sh recreate [dev]                   # delete + create an empty volume
 ```
 
-Add `-y` / `--yes` to skip confirmation prompts. Destructive commands (`delete`, `recreate`, `restore`) refuse to run while a container is using the volume — stop it first with `./run.sh -k` or `./run-exp.sh -k`. Back up before you recreate:
+Add `-y` / `--yes` to skip confirmation prompts. Destructive commands (`delete`, `recreate`, `restore`) refuse to run while a container is using the volume — stop it first with `./run.sh -k`. Back up before you recreate:
 
 ```bash
 ./workspace.sh backup dev ~/dev-workspace.tar.gz   # snapshot first
@@ -66,7 +104,7 @@ Add `-y` / `--yes` to skip confirmation prompts. Destructive commands (`delete`,
 
 ### Docker Access
 
-The docker socket is bound into the container, so you (and Claude) can use the docker cli directly.
+By default the host's docker socket is bound into the container (from `docker-compose.docker-socket.yml`), so you (and Claude) can use the docker cli directly. Pass `-D` to `run.sh` to leave it out; the container then has no access to the host's docker daemon.
 
 ## Tailscale
 
@@ -150,6 +188,10 @@ Force rebuild the image with --no-cache
 
 Run with the tailscale sidecar for outbound tailnet access. Requires `TS_AUTHKEY` to be set in `.settings`. Without `-t`, the dev container runs standalone with standard docker bridge networking (the default).
 
+`./run.sh -D`
+
+Don't mount the host docker socket. See [Docker Access](#docker-access).
+
 `./run.sh -h`
 
 Mount host home directory to /host-home in the container
@@ -185,55 +227,6 @@ DOCKER_VOLUMES="vol1:/data1,vol2:/data2,vol3:/data3:ro" ./run.sh
 # Named volumes or bind mounts
 DOCKER_VOLUMES="/host/path:/container/path,named-volume:/app/storage" ./run.sh
 ```
-
-## Experimental Container (run-exp.sh)
-
-An isolated container for running Claude Code in YOLO mode with restricted host access. Uses Docker network-level isolation that cannot be bypassed from inside the container (unlike iptables rules which can be flushed with sudo).
-
-Inside the container, the `claude-yolo` alias runs Claude Code with `--dangerously-skip-permissions`.
-
-### How it works
-
-The experimental container sits on a Docker `internal: true` network with no gateway -- it has no direct route to the host or internet. A lightweight proxy sidecar (alpine + tinyproxy/socat/dnsmasq) bridges the internal and external networks:
-
-- **Internet access** via HTTP/HTTPS proxy (tinyproxy on the sidecar)
-- **OAuth2 forwarding** via TCP pipe to host port 48272 only (socat on the sidecar)
-- **DNS resolution** via DNS forwarder (dnsmasq on the sidecar)
-- **Host access blocked** by iptables on the proxy sidecar (separate container, unreachable from exp)
-
-What's restricted vs the dev container:
-- No Docker socket
-- No host volume mounts
-- No git credential forwarding (port 38274 is unreachable)
-- No X11 display
-
-### Usage
-
-`./run-exp.sh`
-
-Builds both images (main + proxy sidecar) and starts the containers. If already running, attaches to the exp container.
-
-`./run-exp.sh -k`
-
-Stop and remove both containers.
-
-`./run-exp.sh -r`
-
-Delete both images.
-
-`./run-exp.sh -x`
-
-Stop both containers and delete both images.
-
-`./run-exp.sh -b`
-
-Force rebuild both images with --no-cache.
-
-### Limitations
-
-- Tools that don't respect `HTTP_PROXY`/`HTTPS_PROXY` will fail to connect (fail-closed, which is the intended security behavior)
-- Use HTTPS git URLs -- git over SSH won't work through the HTTP proxy
-- Authenticate git via `gh auth login --web` (uses the OAuth2 forwarder) then `gh auth setup-git`
 
 ## XServer
 
@@ -301,6 +294,8 @@ break:
 The escape hatch for all of these is `codex -c use_legacy_landlock=true`.
 
 ## Chromium
+
+Browsers come from the `playwright` step (version pinned in `install/versions.env`) and live in `~/.cache/ms-playwright`. Projects that use a different Playwright version download their own browsers with `npx playwright install`.
 
 - Call with `--disable-gpu` to get rid of graphics warnings.
 - Call with `--window-size=1280,1024` or similar to set window size

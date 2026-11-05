@@ -39,6 +39,8 @@ MOUNT_HOME=""
 COMPOSE_FILES=""
 USE_TAILSCALE=false
 TAILSCALE_COMPOSE_FILE="docker-compose.tailscale.yml"
+MOUNT_DOCKER_SOCKET=true
+DOCKER_SOCKET_COMPOSE_FILE="docker-compose.docker-socket.yml"
 
 # Pick the right compose file for teardown based on whether the tailscale
 # sidecar container exists, so -k/-x clean up correctly regardless of how
@@ -61,7 +63,7 @@ if [[ -n "$DOCKER_VOLUMES" ]]; then
     echo "Will mount additional volumes: $DOCKER_VOLUMES"
 fi
 
-while getopts ":krxbthm:" option; do
+while getopts ":krxbtDhm:" option; do
     case $option in
         k)
             echo "Stopping and removing containers..."
@@ -82,6 +84,10 @@ while getopts ":krxbthm:" option; do
             ;;
         t)
             USE_TAILSCALE=true
+            ;;
+        D)
+            MOUNT_DOCKER_SOCKET=false
+            echo "Will not mount the host docker socket"
             ;;
         h)
             NEED_OVERRIDE=true
@@ -114,6 +120,9 @@ if [[ "$USE_TAILSCALE" == true ]]; then
     echo "Tailscale sidecar enabled."
 else
     COMPOSE_FILES="-f docker-compose.yml"
+fi
+if [[ "$MOUNT_DOCKER_SOCKET" == true ]]; then
+    COMPOSE_FILES="$COMPOSE_FILES -f $DOCKER_SOCKET_COMPOSE_FILE"
 fi
 
 # Build image if not built already or if -b flag was used
