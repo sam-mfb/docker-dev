@@ -39,7 +39,7 @@ The image starts from plain `ubuntu:24.04`. Almost everything in it is installed
 | cloud | GitHub CLI, Azure CLI and its DevOps extension |
 | desktop | virtual display with noVNC, dbus, gnome-keyring, the MFB root certificate, Playwright browsers |
 | forwarders | git credential and OAuth2 forwarder clients |
-| ai | Claude Code and the claude-meta plugin, codex, Antigravity CLI, opencode, kashkeshet |
+| ai | Claude Code and the claude-meta plugin, codex, Antigravity CLI, opencode, kashkeshet, Muse Code |
 
 Run `install/install.sh --list` to see every step, which user it runs as, and what it depends on.
 
