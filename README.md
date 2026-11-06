@@ -234,7 +234,9 @@ Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer
 
 So does using clipboard transferring with `xclip`
 
-And, it is easier to have it running to use gnome-keyring. It is possible to pass gnome-keyring a password from stdin but i'd have to write some util to get the password in a secure fashion.
+## Keyring
+
+Tools like `gh` save secrets in gnome-keyring. The first shell after the container starts asks for the keyring password. On the first start ever, you choose it. Press Enter to skip; the keyring then stays off, and tools fall back to their own storage. Run `keyring-unlock` to unlock it later. Other shells reuse the unlocked keyring without asking.
 
 ### On Mac --
 
