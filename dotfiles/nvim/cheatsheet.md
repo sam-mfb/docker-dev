@@ -7,6 +7,20 @@ other prefixes.
 - **Space ?** opens this sheet (or `:Cheatsheet`). `q` closes it.
 - **Space k** searches every key mapping by name.
 
+## Learn these first
+
+| Keys | Action |
+| --- | --- |
+| **Ctrl-y** | **Accept the completion** (Tab no longer does; it just inserts a tab) |
+| Ctrl-n / Ctrl-p | Move down / up the completion menu |
+| gd | Go to definition (Ctrl-o jumps back) |
+| K | Documentation for the word under the cursor |
+| gra | Code actions and quick fixes |
+| grn | Rename |
+| ]d / [d | Next / previous error or warning |
+| Ctrl-p | Find a file |
+| Space / | Search text in the project |
+
 ## Coming from the old vim setup
 
 | Old (vim + coc) | Now | What it does |
