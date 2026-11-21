@@ -45,6 +45,11 @@ alias lsg='ls "$(git rev-parse --show-cdup)"'
 # if you are not a vim user you may want to comment this out
 set -o vi
 
+# Neovim is the editor (git commit messages, Ctrl-x Ctrl-e, ...). `vim` and
+# `vi` open it too; `command vim` runs the plain vim fallback.
+export EDITOR=nvim VISUAL=nvim
+alias vim=nvim vi=nvim
+
 # git tab completion (ships with git)
 if ! complete -p git >/dev/null 2>&1 && [ -f /usr/share/bash-completion/completions/git ]; then
     . /usr/share/bash-completion/completions/git

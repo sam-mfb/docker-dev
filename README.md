@@ -1,6 +1,6 @@
 # docker-dev
 
-Dockerfile and scripts to setup a linux dev environment pre-configured for using vim as an IDE.
+Dockerfile and scripts to setup a linux dev environment pre-configured for using Neovim as an IDE.
 
 ## Setup
 
@@ -13,7 +13,7 @@ Dockerfile and scripts to setup a linux dev environment pre-configured for using
 
 ## Architecture
 
-By default the dev environment runs a single container (`dev`) with standard docker bridge networking: the development environment with vim, Claude Code, etc.; ports published directly to the host (3002, 3010-3019, 6080).
+By default the dev environment runs a single container (`dev`) with standard docker bridge networking: the development environment with Neovim, Claude Code, etc.; ports published directly to the host (3002, 3010-3019, 6080).
 
 ```
 Host (Docker Desktop)
@@ -33,7 +33,7 @@ The image starts from plain `ubuntu:24.04`. Almost everything in it is installed
 | Group | What it installs |
 | --- | --- |
 | base | core packages (curl, jq, sudo, ...), the en_US.UTF-8 locale, git |
-| terminal | vim, tmux, fzf, ripgrep, network and database clients; the dotfiles; vim plugins and coc |
+| terminal | Neovim, tmux, fzf, ripgrep, network and database clients; the dotfiles; Neovim plugins, language servers and treesitter parsers |
 | languages | build tools and Python, node (nvm), Rust, uv, .NET, PowerShell, Rush |
 | docker | docker CLI, buildx, and compose (for use with a mounted host socket) |
 | cloud | GitHub CLI, Azure CLI and its DevOps extension |
@@ -59,6 +59,16 @@ install/install.sh --check                  # what is installed, at what version
 install/install.sh --only ai --force        # upgrade the AI tools
 install/install.sh --only claude-meta --force   # same as ~/update-claude-meta.sh
 ```
+
+### Neovim
+
+The editor is Neovim, set up in Lua with its built-in language server client. The config is in `dotfiles/nvim/` and is installed to `~/.config/nvim/`. Its keys are in the [Neovim cheat sheet](dotfiles/nvim/cheatsheet.md), which you can also open inside the editor with `Space ?`.
+
+- **Languages:** TypeScript/JavaScript (vtsls, ESLint, Prettier), HTML, CSS/SCSS, JSON and YAML (with SchemaStore schemas), Rust (rust-analyzer from the rust step), PowerShell. C# is not set up yet.
+- **Pinned plugins:** `dotfiles/nvim/lazy-lock.json` holds the exact plugin commits. After `:Lazy update`, copy `~/.config/nvim/lazy-lock.json` back to the repo.
+- **Tools and parsers:** listed in `dotfiles/nvim/lua/config/tools.lua`. The `nvim-plugins` step installs them through Mason and nvim-treesitter when the image is built, so the editor downloads nothing on first start.
+- **Spelling:** cspell reads `~/.config/cspell/cspell.json`. Shared words go in `dotfiles/cspell/docker-dev-words.txt`; words added in the editor go in `~/.config/cspell/my-words.txt`, which is not kept across containers.
+- `vim` and `vi` are aliases for `nvim`. Plain vim stays installed as a fallback (`command vim`).
 
 The image keeps a copy of the scripts in `/opt/docker-dev`, so `/opt/docker-dev/install/install.sh` works even without this repo checked out.
 

@@ -1,5 +1,7 @@
 # tmux cheat sheet
 
+For the editor, see the [Neovim cheat sheet](dotfiles/nvim/cheatsheet.md).
+
 The prefix is **Ctrl-a**. Press it, let go, then press the key.
 
 ## Sessions
@@ -28,7 +30,7 @@ The prefix is **Ctrl-a**. Press it, let go, then press the key.
 | --- | --- |
 | Ctrl-a " | Split, new pane below |
 | Ctrl-a % | Split, new pane to the right |
-| Ctrl-h / j / k / l | Move to the pane left / down / up / right (works across vim splits) |
+| Ctrl-h / j / k / l | Move to the pane left / down / up / right (works across Neovim splits) |
 | Ctrl-\ | Back to the previous pane |
 | Ctrl-a Ctrl-h / j / k / l | Resize (hold Ctrl and repeat) |
 | Ctrl-a z | Zoom this pane in and out |

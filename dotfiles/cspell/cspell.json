@@ -1,0 +1,8 @@
+{
+  "version": "0.2",
+  "dictionaryDefinitions": [
+    { "name": "docker-dev-words", "path": "./docker-dev-words.txt" },
+    { "name": "my-words", "path": "./my-words.txt", "addWords": true }
+  ],
+  "dictionaries": ["docker-dev-words", "my-words"]
+}
