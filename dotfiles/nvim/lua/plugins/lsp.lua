@@ -10,6 +10,41 @@ local tools = require('config.tools')
 -- optional rust step, and the PowerShell server needs pwsh.
 local requires = { rust_analyzer = 'rust-analyzer', powershell_es = 'pwsh' }
 
+-- rust-analyzer in ~/.cargo/bin is rustup's shim: it runs the copy that
+-- belongs to the project's Rust version (rust-toolchain.toml). A project that
+-- pins a version without the rust-analyzer component (profile = "minimal",
+-- say) makes the shim exit at once, which Neovim reports as a crash. There,
+-- use the default Rust version's rust-analyzer instead. It still builds and
+-- checks the project with the project's own Rust version.
+local function rust_analyzer_cmd(dispatchers, config)
+  local root = config.root_dir
+  local function which(args)
+    local r = vim.system(vim.list_extend({ 'rustup', 'which' }, args), { cwd = root, text = true }):wait()
+    local path = vim.trim(r.stdout or '')
+    if r.code == 0 and path ~= '' and vim.fn.executable(path) == 1 then
+      return path
+    end
+  end
+
+  local exe = 'rust-analyzer'
+  if vim.fn.executable('rustup') == 1 and not which({ 'rust-analyzer' }) then
+    local default = vim.trim(vim.fn.system({ 'rustup', 'default' })):match('^(%S+)')
+    local fallback = default and which({ '--toolchain', default, 'rust-analyzer' })
+    if fallback then
+      exe = fallback
+      vim.schedule(function()
+        vim.notify(('This project\'s Rust version has no rust-analyzer; using the one from %s'):format(default))
+      end)
+    end
+    -- Neither has one: start the shim anyway, so its error lands in the LSP log.
+  end
+  return vim.lsp.rpc.start({ exe }, dispatchers, {
+    cwd = config.cmd_cwd or root,
+    env = config.cmd_env,
+    detached = config.detached,
+  })
+end
+
 return {
   {
     'mason-org/mason.nvim',
@@ -51,6 +86,8 @@ return {
           },
         },
       })
+
+      vim.lsp.config('rust_analyzer', { cmd = rust_analyzer_cmd })
 
       vim.lsp.config('powershell_es', {
         bundle_path = vim.fn.stdpath('data') .. '/mason/packages/powershell-editor-services',

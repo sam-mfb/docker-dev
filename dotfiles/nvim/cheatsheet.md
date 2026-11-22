@@ -56,9 +56,14 @@ every key that follows. **Space ?** opens this sheet; `q` closes it.
 | Space k | Search key mappings |
 | Space H | Search Neovim's help |
 
-Inside any list, **Ctrl-v** / **Ctrl-s** / **Ctrl-t** open the item in a
-vertical split / split / tab, and **Tab** then **Alt-q** sends marked items
-to the quickfix list.
+Inside the Ctrl-p list and the other file lists:
+
+| Old | Now | Action |
+| --- | --- | --- |
+| Ctrl-x | **Ctrl-s** | Open in a horizontal split |
+| | Ctrl-v | Open in a vertical split (unchanged) |
+| | Ctrl-t | Open in a new tab (unchanged) |
+| | Tab, then Alt-q | Mark several, send them to the quickfix list |
 
 ## Git (new)
 
