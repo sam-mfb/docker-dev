@@ -34,7 +34,7 @@ The image starts from plain `ubuntu:24.04`. Almost everything in it is installed
 | --- | --- |
 | base | core packages (curl, jq, sudo, ...), the en_US.UTF-8 locale, git |
 | terminal | Neovim, tmux, fzf, ripgrep, network and database clients; the dotfiles; Neovim plugins, language servers and treesitter parsers |
-| languages | build tools and Python, node (nvm), Rust, uv, .NET, PowerShell, Rush |
+| languages | build tools and Python, node (nvm), Rust, uv, .NET, PowerShell, Rush, Lean (elan) |
 | docker | docker CLI, buildx, and compose (for use with a mounted host socket) |
 | cloud | GitHub CLI, Azure CLI and its DevOps extension |
 | desktop | virtual display with noVNC, dbus, gnome-keyring, the MFB root certificate, Playwright browsers |
@@ -64,10 +64,12 @@ install/install.sh --only claude-meta --force   # same as ~/update-claude-meta.s
 
 The editor is Neovim, set up in Lua with its built-in language server client. The config is in `dotfiles/nvim/` and is installed to `~/.config/nvim/`. Its keys are in the [Neovim cheat sheet](dotfiles/nvim/cheatsheet.md), which you can also open inside the editor with `Space ?`.
 
-- **Languages:** TypeScript/JavaScript (vtsls, ESLint, Prettier), HTML, CSS/SCSS, JSON and YAML (with SchemaStore schemas), Rust (rust-analyzer from the rust step), PowerShell. C# is not set up yet.
+- **Languages:** TypeScript/JavaScript (vtsls, ESLint, Prettier), HTML, CSS/SCSS, JSON and YAML (with SchemaStore schemas), Rust (rust-analyzer from the rust step), PowerShell, Lean (lean.nvim, with the Lean server from each project's toolchain). C# is not set up yet.
 - **Pinned plugins:** `dotfiles/nvim/lazy-lock.json` holds the exact plugin commits. After `:Lazy update`, copy `~/.config/nvim/lazy-lock.json` back to the repo.
 - **Tools and parsers:** listed in `dotfiles/nvim/lua/config/tools.lua`. The `nvim-plugins` step installs them through Mason and nvim-treesitter when the image is built, so the editor downloads nothing on first start.
 - **Spelling:** cspell reads `~/.config/cspell/cspell.json`. Shared words go in `dotfiles/cspell/docker-dev-words.txt`; words added in the editor go in `~/.config/cspell/my-words.txt`, which is not kept across containers.
+- **Lean:** the `lean` step installs elan and the stable Lean toolchain. Projects download the Lean version in their `lean-toolchain` file on first use. Mathlib is not in the image: run `lake exe cache get` once in each Mathlib project (about 5 GB) to skip compiling it.
+- **Colour scheme:** tokyonight by default; `:colorscheme vscode` switches to VS Code's Dark+.
 - `vim` and `vi` are aliases for `nvim`. Plain vim stays installed as a fallback (`command vim`).
 
 The image keeps a copy of the scripts in `/opt/docker-dev`, so `/opt/docker-dev/install/install.sh` works even without this repo checked out.

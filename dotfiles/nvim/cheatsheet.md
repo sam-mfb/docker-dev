@@ -87,6 +87,45 @@ Inside the Ctrl-p list and the other file lists:
 | ]b / [b | Next / previous buffer |
 | Esc | Clear search highlighting |
 
+## Lean (new)
+
+Open any `.lean` file. The infoview on the right shows the proof goals at
+the cursor; proofs are checked as you type. Lean keys use `\` (the local
+leader), not Space.
+
+| Keys | Action |
+| --- | --- |
+| `\i` | Show / hide the infoview |
+| `\` Tab | Jump into the infoview (and back) |
+| `\x` / `\c` | Pin the current goal / clear pins |
+| `\r` | Restart Lean for this file (after changing imports or dependencies) |
+| `\\` | Show how to type the symbol under the cursor |
+| `\to`, `\forall`, `\N`, `\alpha`, ... then Space | Type `→`, `∀`, `ℕ`, `α`, ... in Insert mode |
+
+Go to definition, `K`, `grn`, `gra`, `]d` and completion work as for other
+languages. In the margin, a 🎉 marks a finished proof.
+
+| Command | Use |
+| --- | --- |
+| `lake new myproj` | New project (`lake new myproj math` for one using Mathlib) |
+| `lake build` | Check the whole project. Run it before trusting a result |
+| `lake exe cache get` | In a Mathlib project: download prebuilt Mathlib (about 5 GB). Do this once per project, or Mathlib compiles for an hour or more |
+| `elan show` | Which Lean version this project uses (from its `lean-toolchain` file) |
+
+## Colour scheme
+
+The default is tokyonight. To switch for the current session:
+
+| Command | Look |
+| --- | --- |
+| `:colorscheme vscode` | VS Code's Dark+ |
+| `:colorscheme tokyonight` | Back to the default (blue-grey) |
+| `:colorscheme tokyonight-night` / `-moon` / `-day` | Other tokyonight variants |
+
+To make one the default, change `vim.cmd.colorscheme('tokyonight')` in
+`dotfiles/nvim/lua/plugins/ui.lua` to the name you want, then rerun
+`install/install.sh --only nvim-plugins`.
+
 ## Gone
 
 Arrow-key blocking, snippets, `\d` doc comments (vim-doge), and C# (coming

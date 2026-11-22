@@ -11,11 +11,16 @@ return {
     end,
   },
 
+  -- Installed but not the default: VS Code's Dark+ look (the Lua successor to
+  -- vim-code-dark). `:colorscheme vscode` switches to it; see cheatsheet.md.
+  -- lazy.nvim loads it when that command names it.
+  { 'Mofiqul/vscode.nvim', lazy = true },
+
   {
     'nvim-lualine/lualine.nvim',
     opts = {
       options = {
-        theme = 'tokyonight',
+        theme = 'auto', -- follows whichever colour scheme is active
         icons_enabled = false,
         component_separators = '|',
         section_separators = '',
