@@ -150,13 +150,65 @@ EOF
     COMPOSE_FILES="$COMPOSE_FILES -f $OVERRIDE_FILE"
 fi
 
+# How copies made in the container reach the Mac clipboard. Programs in the
+# container (tmux, Neovim, Claude Code) send each copy as an OSC 52 escape
+# sequence. Terminals that support it set the clipboard themselves ("native");
+# for the rest, host/osc52wrap sits between docker exec and the terminal and
+# runs pbcopy ("wrap"). DOCKER_DEV_CLIPBOARD=auto|wrap|native|off overrides.
+clipboard_mode() {
+    local mode="${DOCKER_DEV_CLIPBOARD:-auto}"
+    case "$mode" in
+        wrap|native|off) echo "$mode"; return ;;
+        auto) ;;
+        *) echo "Warning: DOCKER_DEV_CLIPBOARD=$mode is not auto, wrap, native or off; using auto" >&2 ;;
+    esac
+    # Wrapping needs macOS's pbcopy and a python3. On a Mac without the Xcode
+    # command line tools, /usr/bin/python3 is a stub that offers to install
+    # them, so only count it when they are installed.
+    local py
+    py="$(command -v python3)"
+    if [[ "$(uname -s)" != Darwin ]] || ! command -v pbcopy >/dev/null || [[ -z "$py" ]] ||
+            { [[ "$py" == /usr/bin/python3 ]] && ! xcode-select -p >/dev/null 2>&1; }; then
+        echo off
+        return
+    fi
+    # Terminals known to accept OSC 52 copies out of the box. iTerm2 only does
+    # with a setting enabled, which can't be seen from here, so it is wrapped;
+    # set DOCKER_DEV_CLIPBOARD=native if yours has it on.
+    if [[ -n "$KITTY_WINDOW_ID" ]]; then
+        echo native
+        return
+    fi
+    case "$TERM_PROGRAM" in
+        ghostty|WezTerm) echo native ;;
+        *) echo wrap ;;
+    esac
+}
+
+attach() {
+    local cmd=(docker exec -it --detach-keys='ctrl-z,z' "${CONTAINER_NAME}" bash)
+    case "$(clipboard_mode)" in
+        wrap)
+            echo "Copies in the container go to the Mac clipboard (through host/osc52wrap)."
+            python3 "$(dirname "${BASH_SOURCE[0]}")/host/osc52wrap" "${cmd[@]}"
+            ;;
+        native)
+            echo "Copies in the container go to the Mac clipboard (the terminal handles OSC 52)."
+            "${cmd[@]}"
+            ;;
+        *)
+            "${cmd[@]}"
+            ;;
+    esac
+}
+
 # Check if containers are already running
 if [[ "$(docker compose ${COMPOSE_FILES} ps -q dev 2> /dev/null)" != "" ]]; then
     echo "Dev container is already running, attaching to bash shell..."
-    docker exec -it --detach-keys='ctrl-z,z' ${CONTAINER_NAME} bash
+    attach
 else
     echo "Starting services..."
     docker compose ${COMPOSE_FILES} up -d
     echo "Attaching to dev container..."
-    docker exec -it --detach-keys='ctrl-z,z' ${CONTAINER_NAME} bash
+    attach
 fi

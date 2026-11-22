@@ -1,0 +1,212 @@
+#!/usr/bin/env python3
+"""osc52wrap: run a command in a terminal, sending its clipboard copies to the
+Mac clipboard.
+
+    osc52wrap COMMAND [ARGS...]
+
+Programs copy by printing an OSC 52 escape sequence (ESC ] 52 ; c ; <base64>
+BEL), which a supporting terminal turns into a clipboard write. Terminal.app
+ignores it, so run.sh starts `docker exec` through this wrapper there. The
+wrapper runs COMMAND on its own pseudo-terminal, passes everything through
+unchanged, and takes out each OSC 52 copy, decoding it and piping it to
+pbcopy. Requests to *read* the clipboard (`?` instead of data) are dropped
+unanswered, so nothing behind the wrapper can read the Mac clipboard.
+
+The copy command is pbcopy, or OSC52WRAP_COPY_CMD (split on spaces) if set.
+Only the Python 3 standard library is used.
+"""
+
+import base64
+import errno
+import fcntl
+import os
+import select
+import signal
+import struct
+import subprocess
+import sys
+import termios
+import tty
+
+OSC52 = b"\x1b]52;"
+BEL = b"\x07"
+ST = b"\x1b\\"
+# A sequence still unterminated past this size is passed through unchanged.
+MAX_SEQUENCE = 16 * 1024 * 1024
+# How long to hold back a possible start of a sequence (a trailing ESC, say)
+# before letting it through.
+HOLD_SECONDS = 0.05
+
+
+def copy_to_clipboard(data):
+    cmd = os.environ.get("OSC52WRAP_COPY_CMD", "pbcopy").split()
+    env = dict(os.environ)
+    env.setdefault("LANG", "en_US.UTF-8")  # pbcopy needs it for non-ASCII text
+    try:
+        subprocess.run(cmd, input=data, env=env, timeout=10, check=False,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+
+def handle_osc52(body):
+    """BODY is what follows ESC ] 52 ; up to the terminator: 'c;<base64>'."""
+    _, sep, payload = body.partition(b";")
+    if not sep or payload == b"?":
+        return  # malformed, or a request to read the clipboard: drop it
+    payload = payload.strip()
+    payload += b"=" * (-len(payload) % 4)
+    try:
+        data = base64.b64decode(payload)
+    except ValueError:
+        return
+    if data:
+        copy_to_clipboard(data)
+
+
+class Filter:
+    """Removes OSC 52 sequences from a byte stream that may split them
+    anywhere."""
+
+    def __init__(self):
+        self.pending = b""
+
+    def feed(self, chunk):
+        """Return the bytes to show now."""
+        data = self.pending + chunk
+        self.pending = b""
+        out = []
+        while True:
+            start = data.find(OSC52)
+            if start < 0:
+                # Hold back a tail that could be the start of a sequence.
+                keep = 0
+                for n in range(min(len(OSC52) - 1, len(data)), 0, -1):
+                    if OSC52.startswith(data[-n:]):
+                        keep = n
+                        break
+                out.append(data[:len(data) - keep])
+                self.pending = data[len(data) - keep:]
+                break
+            out.append(data[:start])
+            body_start = start + len(OSC52)
+            ends = [i for i in (data.find(BEL, body_start), data.find(ST, body_start)) if i >= 0]
+            if not ends:
+                if len(data) - start > MAX_SEQUENCE:
+                    out.append(data[start:])  # too big: give up, pass it on
+                else:
+                    self.pending = data[start:]
+                break
+            end = min(ends)
+            handle_osc52(data[body_start:end])
+            data = data[end + (1 if data[end:end + 1] == BEL else 2):]
+        return b"".join(out)
+
+    def flush(self):
+        """Give up holding a partial start (not a sequence in progress)."""
+        if self.pending and not self.pending.startswith(OSC52):
+            data, self.pending = self.pending, b""
+            return data
+        return b""
+
+
+def write_all(fd, data):
+    while data:
+        try:
+            n = os.write(fd, data)
+        except OSError as e:
+            if e.errno in (errno.EAGAIN, errno.EINTR):
+                select.select([], [fd], [])
+                continue
+            raise
+        data = data[n:]
+
+
+def copy_window_size(src_fd, dst_fd):
+    try:
+        size = fcntl.ioctl(src_fd, termios.TIOCGWINSZ, struct.pack("HHHH", 0, 0, 0, 0))
+        fcntl.ioctl(dst_fd, termios.TIOCSWINSZ, size)
+    except OSError:
+        pass
+
+
+def exit_code(status):
+    if os.WIFEXITED(status):
+        return os.WEXITSTATUS(status)
+    if os.WIFSIGNALED(status):
+        return 128 + os.WTERMSIG(status)
+    return 1
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        sys.stderr.write(__doc__)
+        return 0 if argv else 2
+
+    stdin_fd, stdout_fd = sys.stdin.fileno(), sys.stdout.fileno()
+    if not os.isatty(stdin_fd):
+        # Nothing to wrap: no terminal to drive (docker exec -it would refuse
+        # anyway). Run the command as is.
+        os.execvp(argv[0], argv)
+
+    master, slave = os.openpty()
+    copy_window_size(stdin_fd, master)  # before the command starts, so it sees it
+    pid = os.fork()
+    if pid == 0:
+        try:
+            os.close(master)
+            os.setsid()
+            fcntl.ioctl(slave, termios.TIOCSCTTY, 0)
+            for fd in (0, 1, 2):
+                os.dup2(slave, fd)
+            if slave > 2:
+                os.close(slave)
+            os.execvp(argv[0], argv)
+        except OSError as e:
+            os.write(2, ("osc52wrap: %s: %s\n" % (argv[0], e.strerror)).encode())
+        os._exit(127)
+    os.close(slave)
+
+    signal.signal(signal.SIGWINCH, lambda *_: copy_window_size(stdin_fd, master))
+    # Closing the window or being killed still restores the terminal.
+    for sig in (signal.SIGTERM, signal.SIGHUP):
+        signal.signal(sig, lambda *_: sys.exit(1))
+
+    saved = termios.tcgetattr(stdin_fd)
+    filt = Filter()
+    try:
+        tty.setraw(stdin_fd)
+        inputs = [master, stdin_fd]
+        while True:
+            timeout = HOLD_SECONDS if filt.pending else None
+            readable, _, _ = select.select(inputs, [], [], timeout)
+            if not readable:
+                write_all(stdout_fd, filt.flush())
+                continue
+            if master in readable:
+                try:
+                    chunk = os.read(master, 65536)
+                except OSError as e:
+                    if e.errno != errno.EIO:  # EIO: the command has exited
+                        raise
+                    chunk = b""
+                if not chunk:
+                    break
+                write_all(stdout_fd, filt.feed(chunk))
+            if stdin_fd in readable:
+                data = os.read(stdin_fd, 65536)
+                if data:
+                    write_all(master, data)
+                else:
+                    inputs.remove(stdin_fd)
+        write_all(stdout_fd, filt.pending)  # whatever was held back
+    finally:
+        termios.tcsetattr(stdin_fd, termios.TCSAFLUSH, saved)
+        os.close(master)
+
+    _, status = os.waitpid(pid, 0)
+    return exit_code(status)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

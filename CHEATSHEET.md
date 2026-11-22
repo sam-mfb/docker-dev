@@ -42,7 +42,7 @@ The prefix is **Ctrl-a**. Press it, let go, then press the key.
 | --- | --- |
 | Ctrl-a [ | Enter copy mode (vi keys to move) |
 | Space | Start selecting (v switches to a block selection) |
-| y | Copy to the clipboard and leave copy mode |
+| y | Copy to the Mac clipboard (and the container's, for noVNC), and leave copy mode |
 | q | Leave copy mode |
 
 ## Reading the status bar

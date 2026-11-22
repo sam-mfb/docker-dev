@@ -34,9 +34,54 @@ o.updatetime = 300 -- CursorHold sooner: symbol highlight, lint
 o.shortmess:append('c')
 o.modeline = false -- modelines have a history of security bugs
 
--- Yank and paste through the system clipboard. Neovim finds xclip when
--- DISPLAY is set (see dotfiles/bashrc and the desktop step).
+-- Yank and paste through the system clipboard.
 o.clipboard = 'unnamedplus'
+
+-- Each copy goes two ways: to the container's X clipboard through xclip
+-- (noVNC, and `p`), and out to the terminal as OSC 52, which reaches the Mac
+-- clipboard (see run.sh and host/osc52wrap; inside tmux, through its
+-- set-clipboard). Neovim's own detection would pick only one of the two.
+-- Paste never asks the terminal over OSC 52: the Mac side doesn't answer such
+-- requests, so it would only wait and time out. Cmd-V pastes Mac text as
+-- typed input instead.
+do
+  local osc52 = require('vim.ui.clipboard.osc52')
+  local last = {} -- reg -> { lines, regtype }: the paste source without X
+
+  local function copy(reg)
+    local send_osc52 = osc52.copy(reg)
+    return function(lines, regtype)
+      last[reg] = { lines, regtype }
+      if vim.env.DISPLAY and vim.fn.executable('xclip') == 1 then
+        -- Detached, like Neovim's own xclip provider: xclip keeps running to
+        -- hold the selection until something else takes it.
+        vim.system({ 'xclip', '-quiet', '-i', '-selection', 'clipboard' }, {
+          stdin = table.concat(lines, '\n'),
+          detach = true,
+        })
+      end
+      send_osc52(lines, regtype)
+    end
+  end
+
+  local function paste(reg)
+    return function()
+      if vim.env.DISPLAY and vim.fn.executable('xclip') == 1 then
+        local r = vim.system({ 'xclip', '-o', '-selection', 'clipboard' }, { text = true }):wait(2000)
+        if r.code == 0 then
+          return vim.split(r.stdout or '', '\n')
+        end
+      end
+      return last[reg] or { {}, 'v' }
+    end
+  end
+
+  vim.g.clipboard = {
+    name = 'xclip+osc52',
+    copy = { ['+'] = copy('+'), ['*'] = copy('*') },
+    paste = { ['+'] = paste('+'), ['*'] = paste('*') },
+  }
+end
 
 -- Every *.json is JSON with comments, so config files with comments don't
 -- show errors.

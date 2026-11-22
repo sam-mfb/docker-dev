@@ -240,11 +240,29 @@ DOCKER_VOLUMES="vol1:/data1,vol2:/data2,vol3:/data3:ro" ./run.sh
 DOCKER_VOLUMES="/host/path:/container/path,named-volume:/app/storage" ./run.sh
 ```
 
+## Clipboard
+
+Copies made in the container reach the Mac clipboard directly: tmux copy mode (`y`), Neovim yanks, and Claude Code or any other program that copies with an OSC 52 escape sequence. Each copy also still goes to the container's X clipboard, so pasting in noVNC works as before.
+
+Programs in the container send every copy as OSC 52, and tmux passes them on (`set-clipboard on` in `dotfiles/tmux.conf`). On the Mac, `run.sh` picks how to catch them:
+
+| Mode | When (`auto`) | What happens |
+| --- | --- | --- |
+| native | Ghostty, WezTerm, kitty | The terminal sets the clipboard itself |
+| wrap | Terminal.app, iTerm2, VS Code, anything else on macOS | `run.sh` starts `docker exec` through `host/osc52wrap`, which takes each copy out of the output and runs `pbcopy` |
+| off | Not macOS, or no `python3` (it comes with the Xcode command line tools) | Plain `docker exec`, as before |
+
+Set `DOCKER_DEV_CLIPBOARD=wrap`, `native` or `off` to force a mode, for example `native` for an iTerm2 with "Applications in terminal may access clipboard" turned on.
+
+`osc52wrap` is a small Python 3 script using only the standard library. It passes everything else through unchanged, and drops requests to *read* the clipboard, so nothing in the container can read the Mac clipboard. Anything that can print to your terminal can still set it, the same trust any OSC 52 terminal gives.
+
+Not covered: attaching without `run.sh` (run `host/osc52wrap docker exec -it ...` yourself), copying from GUI apps in noVNC, and pasting from the Mac into the container other than by typing (Cmd-V into the terminal works). After changing `tmux.conf`, run `tmux source-file ~/.tmux.conf` or restart tmux.
+
 ## XServer
 
 Running gui apps (e.g. chromium/electron, etc) inside docker requires an XServer on the host.
 
-So does using clipboard transferring with `xclip`
+Copying to the Mac clipboard no longer needs one; see [Clipboard](#clipboard).
 
 ## Keyring
 
