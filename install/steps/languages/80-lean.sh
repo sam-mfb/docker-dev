@@ -11,9 +11,21 @@ STEP_REQUIRES="packages"
 
 ELAN_BIN="$HOME/.elan/bin"
 
-# The toolchain name elan uses: the stable channel, or a pinned release.
-lean_toolchain() {
-    is_latest "$LEAN_TOOLCHAIN" && echo "leanprover/lean4:stable" || echo "leanprover/lean4:v${LEAN_TOOLCHAIN#v}"
+# The toolchain name for a Lean version, as elan writes it.
+toolchain_name() { echo "leanprover/lean4:v${1#v}"; }
+
+# The default toolchain, as recorded in elan's settings. (`elan show` words
+# this differently depending on what is installed, and `elan toolchain list`
+# does not mark it.)
+default_toolchain() {
+    sed -n 's/^default_toolchain *= *"\(.*\)"$/\1/p' "$HOME/.elan/settings.toml" 2>/dev/null
+}
+
+# installed NAME -- the toolchain's folder exists. elan names it after the
+# toolchain with / as -- and : as --- (leanprover--lean4---v4.36.0).
+installed() {
+    local dir="${1//\//--}"
+    [ -n "$1" ] && [ -d "$HOME/.elan/toolchains/${dir//:/---}" ]
 }
 
 elan_arch() {
@@ -26,20 +38,19 @@ elan_arch() {
 
 step_version() {
     [ -x "$ELAN_BIN/elan" ] || return 0
-    echo "elan $("$ELAN_BIN/elan" --version 2>/dev/null | awk '{print $2}'), default $("$ELAN_BIN/elan" toolchain list 2>/dev/null | sed -n 's/ (default)$//p')"
+    echo "elan $("$ELAN_BIN/elan" --version 2>/dev/null | awk '{print $2}'), default $(default_toolchain)"
 }
 step_check() {
     [ -x "$ELAN_BIN/elan" ] || return 1
     version_matches "$ELAN_VERSION" "$("$ELAN_BIN/elan" --version 2>/dev/null | awk '{print $2}')" || return 1
-    # Read the toolchain list rather than run `lean`, which would download a
-    # missing toolchain as a side effect.
-    # With "latest", any default will do (elan may record the release that
-    # stable resolved to); a pinned version must be the default.
-    local list; list="$("$ELAN_BIN/elan" toolchain list 2>/dev/null)"
+    local def; def="$(default_toolchain)"
+    installed "$def" || return 1
+    # With "latest", any release as default will do; it is left alone until
+    # --force, like every other "latest" pin.
     if is_latest "$LEAN_TOOLCHAIN"; then
-        grep -q ' (default)$' <<<"$list"
+        [[ "$def" == leanprover/lean4:v* ]]
     else
-        grep -qxF "$(lean_toolchain) (default)" <<<"$list"
+        [ "$def" = "$(toolchain_name "$LEAN_TOOLCHAIN")" ]
     fi
 }
 step_install() {
@@ -57,7 +68,11 @@ step_install() {
 dd_path_prepend "$HOME/.elan/bin"
 EOT
     export PATH="$ELAN_BIN:$PATH"
-    elan toolchain install "$(lean_toolchain)"
-    elan default "$(lean_toolchain)"
+    # An exact release rather than the "stable" channel: a channel default
+    # makes elan look up the current release online when lean runs.
+    local lean_v="$LEAN_TOOLCHAIN"
+    is_latest "$lean_v" && lean_v="$(github_latest_tag leanprover/lean4)"
+    elan toolchain install "$(toolchain_name "$lean_v")"
+    elan default "$(toolchain_name "$lean_v")"
     lean --version
 }
