@@ -16,30 +16,67 @@ local requires = { rust_analyzer = 'rust-analyzer', powershell_es = 'pwsh' }
 -- say) makes the shim exit at once, which Neovim reports as a crash. There,
 -- use the default Rust version's rust-analyzer instead. It still builds and
 -- checks the project with the project's own Rust version.
-local function rust_analyzer_cmd(dispatchers, config)
-  local root = config.root_dir
-  local function which(args)
-    local r = vim.system(vim.list_extend({ 'rustup', 'which' }, args), { cwd = root, text = true }):wait()
-    local path = vim.trim(r.stdout or '')
-    if r.code == 0 and path ~= '' and vim.fn.executable(path) == 1 then
-      return path
-    end
-  end
+--
+-- The rustup calls run in the background while the project root is found,
+-- never while the editor waits: rust_analyzer_exe holds the answer per
+-- project root, and the server's start command just looks it up.
+local rust_analyzer_exe = {}
 
-  local exe = 'rust-analyzer'
-  if vim.fn.executable('rustup') == 1 and not which({ 'rust-analyzer' }) then
-    local default = vim.trim(vim.fn.system({ 'rustup', 'default' })):match('^(%S+)')
-    local fallback = default and which({ '--toolchain', default, 'rust-analyzer' })
-    if fallback then
-      exe = fallback
-      vim.schedule(function()
-        vim.notify(('This project\'s Rust version has no rust-analyzer; using the one from %s'):format(default))
-      end)
-    end
-    -- Neither has one: start the shim anyway, so its error lands in the LSP log.
+-- rustup_which ROOT ARGS CALLBACK -- path of the program, or nil, to CALLBACK.
+local function rustup_which(root, args, callback)
+  vim.system(vim.list_extend({ 'rustup', 'which' }, args), { cwd = root, text = true }, function(r)
+    local path = vim.trim(r.stdout or '')
+    callback(r.code == 0 and path ~= '' and vim.uv.fs_access(path, 'X') and path or nil)
+  end)
+end
+
+-- Decide which rust-analyzer ROOT uses, then call DONE.
+local function choose_rust_analyzer(root, done)
+  if rust_analyzer_exe[root] or vim.fn.executable('rustup') == 0 then
+    return done()
   end
-  return vim.lsp.rpc.start({ exe }, dispatchers, {
-    cwd = config.cmd_cwd or root,
+  rustup_which(root, { 'rust-analyzer' }, function(own)
+    if own then
+      rust_analyzer_exe[root] = 'rust-analyzer'
+      return done()
+    end
+    vim.system({ 'rustup', 'default' }, { text = true }, function(r)
+      local default = vim.trim(r.stdout or ''):match('^(%S+)')
+      if not default then
+        return done()
+      end
+      rustup_which(nil, { '--toolchain', default, 'rust-analyzer' }, function(fallback)
+        -- Neither has one: leave the shim, so its error lands in the LSP log.
+        rust_analyzer_exe[root] = fallback or 'rust-analyzer'
+        if fallback then
+          vim.schedule(function()
+            vim.notify(('rust-analyzer: this project pins a Rust version without it, so using the one from %s'):format(default))
+          end)
+        end
+        done()
+      end)
+    end)
+  end)
+end
+
+-- nvim-lspconfig's own root finder (it asks cargo for the workspace root),
+-- saved before ours replaces it.
+local lspconfig_rust_root_dir
+
+local function rust_analyzer_root_dir(bufnr, on_dir)
+  lspconfig_rust_root_dir(bufnr, function(root)
+    if not root then
+      return vim.schedule(function() on_dir(root) end)
+    end
+    choose_rust_analyzer(root, function()
+      vim.schedule(function() on_dir(root) end)
+    end)
+  end)
+end
+
+local function rust_analyzer_cmd(dispatchers, config)
+  return vim.lsp.rpc.start({ rust_analyzer_exe[config.root_dir] or 'rust-analyzer' }, dispatchers, {
+    cwd = config.cmd_cwd or config.root_dir,
     env = config.cmd_env,
     detached = config.detached,
   })
@@ -87,7 +124,13 @@ return {
         },
       })
 
-      vim.lsp.config('rust_analyzer', { cmd = rust_analyzer_cmd })
+      -- Keep nvim-lspconfig's root finder (it asks cargo for the workspace)
+      -- and add the rust-analyzer choice after it.
+      lspconfig_rust_root_dir = vim.lsp.config.rust_analyzer.root_dir
+      vim.lsp.config('rust_analyzer', {
+        root_dir = rust_analyzer_root_dir,
+        cmd = rust_analyzer_cmd,
+      })
 
       vim.lsp.config('powershell_es', {
         bundle_path = vim.fn.stdpath('data') .. '/mason/packages/powershell-editor-services',
