@@ -13,8 +13,10 @@ return {
 
   -- Installed but not the default: VS Code's Dark+ look (the Lua successor to
   -- vim-code-dark). `:colorscheme vscode` switches to it; see cheatsheet.md.
-  -- lazy.nvim loads it when that command names it.
-  { 'Mofiqul/vscode.nvim', lazy = true },
+  -- Loaded at startup so `:colorscheme <Tab>` lists it; that applies nothing
+  -- by itself, apart from small treesitter additions for TS/JS (`export`
+  -- coloured like `import`, JSX component names as types).
+  { 'Mofiqul/vscode.nvim', lazy = false },
 
   {
     'nvim-lualine/lualine.nvim',
