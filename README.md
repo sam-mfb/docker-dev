@@ -69,7 +69,7 @@ The editor is Neovim, set up in Lua with its built-in language server client. Th
 - **Tools and parsers:** listed in `dotfiles/nvim/lua/config/tools.lua`. The `nvim-plugins` step installs them through Mason and nvim-treesitter when the image is built, so the editor downloads nothing on first start.
 - **Spelling:** cspell reads `~/.config/cspell/cspell.json`. Shared words go in `dotfiles/cspell/docker-dev-words.txt`; words added in the editor go in `~/.config/cspell/my-words.txt`, which is not kept across containers.
 - **Lean:** the `lean` step installs elan and the stable Lean toolchain. Projects download the Lean version in their `lean-toolchain` file on first use. Mathlib is not in the image: run `lake exe cache get` once in each Mathlib project (about 5 GB) to skip compiling it.
-- **Colour scheme:** tokyonight by default; `:colorscheme vscode` switches to VS Code's Dark+.
+- **Colour scheme:** vscode (VS Code's Dark+) by default; `:colorscheme tokyonight` switches to a blue-grey look.
 - `vim` and `vi` are aliases for `nvim`. Plain vim stays installed as a fallback (`command vim`).
 
 The image keeps a copy of the scripts in `/opt/docker-dev`, so `/opt/docker-dev/install/install.sh` works even without this repo checked out.

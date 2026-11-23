@@ -114,15 +114,15 @@ languages. In the margin, a 🎉 marks a finished proof.
 
 ## Colour scheme
 
-The default is tokyonight. To switch for the current session:
+The default is vscode (VS Code's Dark+). To switch for the current session:
 
 | Command | Look |
 | --- | --- |
-| `:colorscheme vscode` | VS Code's Dark+ |
-| `:colorscheme tokyonight` | Back to the default (blue-grey) |
+| `:colorscheme vscode` | Back to the default (VS Code's Dark+) |
+| `:colorscheme tokyonight` | Blue-grey |
 | `:colorscheme tokyonight-night` / `-moon` / `-day` | Other tokyonight variants |
 
-To make one the default, change `vim.cmd.colorscheme('tokyonight')` in
+To make one the default, change `vim.cmd.colorscheme('vscode')` in
 `dotfiles/nvim/lua/plugins/ui.lua` to the name you want, then rerun
 `install/install.sh --only nvim-plugins`.
 

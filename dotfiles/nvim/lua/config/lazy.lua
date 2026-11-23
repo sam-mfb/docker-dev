@@ -17,7 +17,7 @@ require('lazy').setup({
   spec = { { import = 'plugins' } },
   -- A small config: load everything at startup rather than tune lazy-loading.
   defaults = { lazy = false },
-  install = { colorscheme = { 'tokyonight' } },
+  install = { colorscheme = { 'vscode' } },
   checker = { enabled = false }, -- update on purpose, with :Lazy update
   change_detection = { notify = false },
   rocks = { enabled = false }, -- no plugin here needs luarocks

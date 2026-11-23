@@ -2,21 +2,21 @@
 -- Nerd Font; icons are turned off.
 return {
   {
-    'folke/tokyonight.nvim',
+    'Mofiqul/vscode.nvim',
     priority = 1000, -- before other plugins, so they pick up its colours
-    opts = { style = 'storm' }, -- blue-grey, close to OceanicNext
+    opts = { style = 'dark' }, -- VS Code's Dark+ (the Lua successor to vim-code-dark)
     config = function(_, opts)
-      require('tokyonight').setup(opts)
-      vim.cmd.colorscheme('tokyonight')
+      require('vscode').setup(opts)
+      vim.cmd.colorscheme('vscode')
     end,
   },
 
-  -- Installed but not the default: VS Code's Dark+ look (the Lua successor to
-  -- vim-code-dark). `:colorscheme vscode` switches to it; see cheatsheet.md.
-  -- Loaded at startup so `:colorscheme <Tab>` lists it; that applies nothing
-  -- by itself, apart from small treesitter additions for TS/JS (`export`
-  -- coloured like `import`, JSX component names as types).
-  { 'Mofiqul/vscode.nvim', lazy = false },
+  -- Installed but not the default: blue-grey, close to OceanicNext.
+  -- `:colorscheme tokyonight` switches to it; see cheatsheet.md.
+  {
+    'folke/tokyonight.nvim',
+    opts = { style = 'storm' },
+  },
 
   {
     'nvim-lualine/lualine.nvim',
